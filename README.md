@@ -42,9 +42,30 @@ docs/
 
 See [docs/blueprint/README.md](docs/blueprint/README.md) for the complete technical blueprint.
 
-## Development
+## Local Dev Setup
 
-```bash
-pnpm install
-turbo dev
-```
+**Prerequisites:** Docker Desktop or Docker Engine
+
+1. Start infrastructure (PostgreSQL + Redis):
+   ```bash
+   docker compose up -d
+   ```
+
+2. Copy env and install deps:
+   ```bash
+   cp apps/backend/.env.example apps/backend/.env
+   pnpm install
+   ```
+
+3. Run migrations and start apps:
+   ```bash
+   turbo db:migrate
+   turbo dev
+   ```
+
+4. Stop infrastructure:
+   ```bash
+   docker compose down
+   ```
+
+> Data persists between restarts via named volumes. Use `docker compose down -v` to wipe data.
