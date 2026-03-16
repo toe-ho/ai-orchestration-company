@@ -4,6 +4,10 @@ export class HeartbeatExecutionModels1710000000003 implements MigrationInterface
   name = 'HeartbeatExecutionModels1710000000003';
 
   async up(queryRunner: QueryRunner): Promise<void> {
+    // Add private_ip to company_vms for cancel/connection routing
+    await queryRunner.query(
+      `ALTER TABLE "company_vms" ADD COLUMN IF NOT EXISTS "private_ip" TEXT`,
+    );
     // heartbeat_run_events — SSE events streamed from executor VM
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "heartbeat_run_events" (

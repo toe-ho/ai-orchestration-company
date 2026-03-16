@@ -26,6 +26,9 @@ import type { FlyioConfig } from '../../../config/flyio-config.js';
 
 interface CostAccumulator { inputTokens: number; outputTokens: number; totalCostCents: number }
 
+/** Per-company hibernate timers — cancelled when a new heartbeat starts, preventing premature VM shutdown */
+const idleTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 @CommandHandler(InvokeHeartbeatCommand)
 export class InvokeHeartbeatHandler implements ICommandHandler<InvokeHeartbeatCommand, IHeartbeatRun> {
   private readonly logger = new Logger(InvokeHeartbeatHandler.name);
@@ -101,24 +104,32 @@ export class InvokeHeartbeatHandler implements ICommandHandler<InvokeHeartbeatCo
       adapterType: agent.adapterType, adapterConfig: agent.adapterConfig,
       sessionData: null, contextJson,
       envVars: apiKey ? { ADAPTER_API_KEY: apiKey } : {},
-      timeoutSec: (agent.adapterConfig['timeoutSec'] as number) ?? 600,
+      // Guard against timeoutSec=0 which would abort immediately
+      timeoutSec: (agent.adapterConfig['timeoutSec'] as number) || 600,
     };
+    // Step 10 prep: cancel any pending hibernate timer for this company
+    const existing = idleTimers.get(run.companyId);
+    if (existing) clearTimeout(existing);
     await this.runRepo.update(run.id, { status: 'running', startedAt: new Date() });
     const cost: CostAccumulator = { inputTokens: 0, outputTokens: 0, totalCostCents: 0 };
-    let seq = 0;
     for await (const event of this.runner.execute(request)) {
-      await this.eventRepo.insertEvent({ runId: run.id, seq: seq++, eventType: event.eventType, stream: event.stream, message: event.message, payload: event.payload });
+      // Use event.seq from SSE parser — single source of truth
+      await this.eventRepo.insertEvent({ runId: run.id, seq: event.seq, eventType: event.eventType, stream: event.stream, message: event.message, payload: event.payload });
       await this.publisher.publish(run.companyId, run.id, event);
       if (event.eventType === 'cost' && event.payload) {
-        cost.inputTokens += (event.payload['inputTokens'] as number) ?? 0;
-        cost.outputTokens += (event.payload['outputTokens'] as number) ?? 0;
-        cost.totalCostCents += (event.payload['costCents'] as number) ?? 0;
+        cost.inputTokens += (event.payload['inputTokens'] as number) || 0;
+        cost.outputTokens += (event.payload['outputTokens'] as number) || 0;
+        cost.totalCostCents += (event.payload['costCents'] as number) || 0;
       }
     }
     const finalized = (await this.runRepo.update(run.id, { status: 'succeeded', finishedAt: new Date(), ...cost }))!;
     this.eventBus.publish(new HeartbeatRunCompletedEvent(run.id, run.agentId, run.companyId, 'succeeded', cost.inputTokens, cost.outputTokens, cost.totalCostCents));
-    // Step 10: schedule VM hibernation after idle timeout
-    setTimeout(() => this.commandBus.execute(new HibernateVmCommand(run.companyId)), this.idleTimeoutMin * 60_000);
+    // Step 10: schedule VM hibernation — tracked so it can be cancelled if a new run starts
+    const timer = setTimeout(
+      () => { idleTimers.delete(run.companyId); this.commandBus.execute(new HibernateVmCommand(run.companyId)).catch(() => {}); },
+      this.idleTimeoutMin * 60_000,
+    );
+    idleTimers.set(run.companyId, timer);
     return finalized;
   }
 }

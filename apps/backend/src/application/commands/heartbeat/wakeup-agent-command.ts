@@ -39,7 +39,11 @@ export class WakeupAgentHandler implements ICommandHandler<WakeupAgentCommand, v
       payload: cmd.payload ?? null,
     });
 
-    await this.commandBus.execute(new InvokeHeartbeatCommand(cmd.agentId, cmd.companyId, cmd.source));
-    await this.wakeupRepo.markProcessed(request.id);
+    try {
+      await this.commandBus.execute(new InvokeHeartbeatCommand(cmd.agentId, cmd.companyId, cmd.source));
+    } finally {
+      // Always mark processed so failed runs don't block future wakeups
+      await this.wakeupRepo.markProcessed(request.id);
+    }
   }
 }

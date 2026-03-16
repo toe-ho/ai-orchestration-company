@@ -98,43 +98,39 @@ User (Frontend)
   Update UI with new company
 ```
 
-### 3. Agent Execution Flow (Planned - Phase 4-5)
+### 3. Agent Execution Flow (Phase 4 - Complete)
 
-```
-Control Plane                    Execution Plane
-(NestJS)                         (Per-Company VM)
+**Heartbeat Lifecycle (30-second ticks)**
 
-Agent gets task (issue)
-  │ 1. ResumeAgentCommand
-  ├──────┬─────────────────>  Executor receives task
-  │      │                       │
-  │      │                       ├─ Load adapter (Claude)
-  │      │                       │
-  │      │                       ├─ Initialize session state
-  │      │                       │
-  │      │                       ├─ Stream tokens → OpenAI API
-  │      │                       │
-  │      │                       ├─ Tool call detected → Local execution
-  │      │                       │
-  │      │                       ├─ Iterate: token → tool → result → token
-  │      │                       │
-  │      │                       └─ Completion detected
-  │      │
-  │      │  2. Publish ExecutionEvent (Redis)
-  │      │    {type: 'token', data: '...'}
-  │      │<──────────────────────────┤
-  │      │
-  │      │  3. Subscribe to Redis channel
-  │      │
-  │      ├─ ListenToExecutionEventsQuery
-  │      │
-  │      ├─ Aggregate tokens
-  │      │
-  │      └─ Update issue with result
-  │          PATCH /api/companies/:cid/issues/:id
-  │
-  └─> Persist execution history
-```
+1. **Scheduler Tick** → PostgreSQL advisory lock acquired
+2. **InvokeHeartbeatHandler** (10-step orchestrator):
+   - Get active agents, load context, prepare request
+   - Wake VM via FlyioProvisionerService (stopped → starting → running)
+   - Create HeartbeatRun record, submit to ExecutionEngineService
+3. **ExecutionEngineService**:
+   - HTTP POST to Executor VM with execution request
+   - Stream SSE response, parse HeartbeatRunEvent objects
+   - Publish events to Redis channel: `exec/{companyId}/{agentId}`
+4. **Executor App** (Per-Company Fly.io Machine):
+   - Receive request, load adapter, initialize session
+   - Stream tokens from Claude API, detect tool calls
+   - Execute local tools, iterate token → tool → result
+   - Send completion, stream HeartbeatRunEvent objects back
+5. **Event Processing**:
+   - ExecutionEngineService aggregates result
+   - Publishes final event to Redis for WebSocket delivery
+6. **Cleanup**:
+   - Hibernates VM (running → hibernating)
+   - Marks run completed, updates agent status
+   - ReapOrphanedRunsHandler removes stale runs > 5 min old
+
+**Key Features:**
+- **Advisory Locks:** PostgreSQL prevents duplicate heartbeat scheduling
+- **VM Lifecycle:** stopped → starting → running → hibernating → stopped
+- **Event Streaming:** SSE for sub-100ms execution feedback
+- **Coalescing:** WakeupAgentHandler batches activation requests
+- **Cancellation:** CancelRunHandler stops in-progress executions
+- **Redis Integration:** Live events for real-time UI updates (Phase 7)
 
 ## Data Flow Overview
 
@@ -482,23 +478,35 @@ localhost
 
 ```
 Fly.io Region (e.g., us-east)
-├─ NestJS App (Control Plane)
+├─ Control Plane Machine (NestJS)
 │  ├─ Hostname: api.example.com
-│  ├─ Persistent volume: /data (for logs)
+│  ├─ Handles: Auth, CRUD, heartbeat ticks
+│  ├─ Scheduler: 30s heartbeat + orphan cleanup
+│  ├─ FlyioProvisionerService: Manages VM lifecycle
+│  ├─ ExecutionEngineService: Runs executions
+│  ├─ Persistent volume: /data (logs)
 │  └─ Resources: 512MB RAM, 1x shared CPU
 │
 ├─ PostgreSQL (Managed - Neon)
+│  ├─ Core data (companies, agents, issues)
+│  ├─ Advisory locks for heartbeat synchronization
+│  ├─ HeartbeatRun & HeartbeatRunEvent tables
 │  └─ Connection pooling via PgBouncer
 │
 ├─ Redis (Managed - Upstash)
+│  ├─ Pub/sub: exec/{companyId}/{agentId}
+│  ├─ Live event streaming for WebSocket (Phase 7)
 │  └─ REST API endpoint
 │
-└─ Per-Company Machine (Execution Plane)
-   ├─ Spawned on demand when company activates
+└─ Per-Company Machines (Execution Plane - Phase 4)
+   ├─ Spawned by FlyioProvisionerService on heartbeat
+   ├─ States: stopped → starting → running → hibernating
    ├─ Runs Fastify Executor app
-   ├─ Adapter registry initialized
+   ├─ Adapter registry (Claude, future others)
+   ├─ Session state management
+   ├─ Tool execution environment
    ├─ Redis pub/sub connection
-   └─ Killed when company goes idle
+   └─ Hibernates after execution completes
 ```
 
 ## Performance & Scalability

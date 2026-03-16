@@ -8,6 +8,9 @@ import type { ICompanyVmRepository } from '../../../domain/repositories/i-compan
 import { COMPANY_VM_REPOSITORY } from '../../../domain/repositories/i-company-vm-repository.js';
 import type { FlyioConfig } from '../../../config/flyio-config.js';
 
+/** In-memory per-company lock — prevents TOCTOU race when two heartbeats call ensureVm concurrently */
+const ensureLocks = new Map<string, Promise<ICompanyVm>>();
+
 @Injectable()
 export class FlyioProvisionerService implements IProvisionerService {
   private readonly logger = new Logger(FlyioProvisionerService.name);
@@ -21,7 +24,16 @@ export class FlyioProvisionerService implements IProvisionerService {
     this.flyio = config.get<FlyioConfig>('flyio')!;
   }
 
-  async ensureVm(companyId: string): Promise<ICompanyVm> {
+  ensureVm(companyId: string): Promise<ICompanyVm> {
+    // Coalesce concurrent ensureVm calls for the same company via a shared promise
+    const existing = ensureLocks.get(companyId);
+    if (existing) return existing;
+    const promise = this.doEnsureVm(companyId).finally(() => ensureLocks.delete(companyId));
+    ensureLocks.set(companyId, promise);
+    return promise;
+  }
+
+  private async doEnsureVm(companyId: string): Promise<ICompanyVm> {
     const existing = await this.vmRepo.findByCompanyId(companyId);
     if (existing?.status === VmStatus.Running) return existing;
 
@@ -29,8 +41,13 @@ export class FlyioProvisionerService implements IProvisionerService {
       // Wake a hibernated / stopped machine
       this.logger.log(`Starting machine ${existing.machineId} for company ${companyId}`);
       await this.vmRepo.updateStatus(companyId, VmStatus.Starting);
+      const machine = await this.client.getMachine(existing.machineId);
       await this.client.startMachine(existing.machineId);
-      return this.vmRepo.upsert(companyId, { status: VmStatus.Running, lastActiveAt: new Date() });
+      return this.vmRepo.upsert(companyId, {
+        status: VmStatus.Running,
+        privateIp: machine.private_ip,
+        lastActiveAt: new Date(),
+      } as never);
     }
 
     // Create a new machine
@@ -49,8 +66,9 @@ export class FlyioProvisionerService implements IProvisionerService {
       status: VmStatus.Running,
       region: machine.region,
       size: this.flyio.vmSize,
+      privateIp: machine.private_ip,
       lastActiveAt: new Date(),
-    });
+    } as never);
   }
 
   async hibernateVm(companyId: string): Promise<void> {

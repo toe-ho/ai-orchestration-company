@@ -22,6 +22,9 @@ export class CompanyVmModel extends BaseModel {
   @Column({ type: 'text', nullable: true })
   volumeId!: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  privateIp!: string | null;
+
   @Column({ type: 'timestamptz', nullable: true })
   lastActiveAt!: Date | null;
 }

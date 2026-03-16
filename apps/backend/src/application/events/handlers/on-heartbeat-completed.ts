@@ -19,11 +19,13 @@ export class OnHeartbeatCompletedHandler implements IEventHandler<HeartbeatRunCo
 
   async handle(event: HeartbeatRunCompletedEvent): Promise<void> {
     try {
+      // Read existing state first so we accumulate rather than overwrite
+      const existing = await this.runtimeStateRepo.findByAgent(event.agentId);
       await this.runtimeStateRepo.upsert(event.agentId, event.companyId, {
         currentRunId: null,
-        cumulativeInputTokens: event.inputTokens,
-        cumulativeOutputTokens: event.outputTokens,
-        cumulativeCostCents: event.totalCostCents,
+        cumulativeInputTokens: (existing?.cumulativeInputTokens ?? 0) + event.inputTokens,
+        cumulativeOutputTokens: (existing?.cumulativeOutputTokens ?? 0) + event.outputTokens,
+        cumulativeCostCents: (existing?.cumulativeCostCents ?? 0) + event.totalCostCents,
       });
 
       const agent = await this.agentRepo.findById(event.agentId);
