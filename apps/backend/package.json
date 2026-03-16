@@ -9,6 +9,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:setup": "bash scripts/test-db-setup.sh",
+    "test:teardown": "bash scripts/test-db-teardown.sh",
+    "test:ci": "bash scripts/test-db-setup.sh && pnpm test; EXIT=$?; bash scripts/test-db-teardown.sh; exit $EXIT",
     "db:migrate": "typeorm migration:run -d dist/infrastructure/persistence/data-source.js"
   },
   "dependencies": {

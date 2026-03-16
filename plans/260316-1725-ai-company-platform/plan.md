@@ -1,7 +1,7 @@
 ---
 title: "AI Company Platform Implementation"
 description: "Full-stack platform for autonomous AI-powered companies"
-status: in_progress
+status: in_progress (Phase 4 in progress)
 priority: P1
 effort: "~130h"
 branch: main
@@ -21,7 +21,7 @@ Monorepo (`@aicompany/*`) with 3 apps + 3 packages. NestJS backend (CQRS + TypeO
 |---|-------|--------|--------|------|
 | 1 | Monorepo Scaffold + Shared Types + DB | ~20h | complete | [phase-01](./phase-01-monorepo-scaffold-shared-types-db.md) |
 | 2 | Auth — Better Auth Integration | ~12h | complete | [phase-02](./phase-02-auth-better-auth.md) |
-| 3 | Core CRUD — Companies, Agents, Issues | ~20h | pending | [phase-03](./phase-03-core-crud-companies-agents-issues.md) |
+| 3 | Core CRUD — Companies, Agents, Issues | ~20h | complete | [phase-03](./phase-03-core-crud-companies-agents-issues.md) |
 | 4 | Heartbeat + Execution Engine + Provisioner | ~20h | pending | [phase-04](./phase-04-heartbeat-execution-engine-provisioner.md) |
 | 5 | Claude Adapter + Executor App | ~15h | pending | [phase-05](./phase-05-claude-adapter-executor.md) |
 | 6 | Frontend Pages | ~15h | pending | [phase-06](./phase-06-frontend-pages.md) |

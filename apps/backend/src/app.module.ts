@@ -10,6 +10,8 @@ import { redisConfig } from './config/redis-config.js';
 import { flyioConfig } from './config/flyio-config.js';
 import { DatabaseModule } from './infrastructure/persistence/database-module.js';
 import { AuthModule } from './auth/auth-module.js';
+import { SharedModule } from './module/shared-module.js';
+import { ApiModule } from './module/api-module.js';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { AuthModule } from './auth/auth-module.js';
     ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
+    SharedModule,
+    ApiModule,
   ],
 })
 export class AppModule {}

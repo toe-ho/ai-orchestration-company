@@ -8,7 +8,7 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P1 — core domain operations
-- **Status:** pending
+- **Status:** complete
 - **Review:** pending
 - **Description:** Implement CQRS command/query bus, all CRUD for companies/agents/issues/goals/projects, board controllers, DTOs, ZodValidationPipe, activity logging, company scope interceptor.
 
@@ -198,26 +198,26 @@ Agent controllers:  /api/agents/me, /api/issues/:id/checkout, etc.
     - api-module.ts: all controllers
 
 ## Todo List
-- [ ] CQRS module setup + barrel exports
-- [ ] Base repository (generic TypeORM CRUD)
-- [ ] Company: 3 commands + 2 queries + repository + controller + DTOs
-- [ ] Agent: 5 commands + 3 queries + repository + controller + DTOs
-- [ ] Issue: 4 commands + 4 queries + repository + controller + DTOs
-- [ ] Goal: 2 commands + 1 query + repository + controller
-- [ ] Project: 3 commands + 2 queries + repository + controller
-- [ ] Activity: 1 command + 1 query + repository
-- [ ] Dashboard summary query
-- [ ] ZodValidationPipe
-- [ ] ActivityLogInterceptor
-- [ ] CompanyScopeInterceptor
-- [ ] HttpExceptionFilter
-- [ ] HttpLoggerInterceptor
-- [ ] HealthCheckController
-- [ ] Agent self controller (GET /agents/me)
-- [ ] Agent issue controller (checkout, update, comment)
-- [ ] Module registration (shared-module + api-module)
-- [ ] Integration test: company CRUD flow
-- [ ] Integration test: issue checkout atomicity
+- [x] CQRS module setup + barrel exports
+- [x] Base repository (generic TypeORM CRUD)
+- [x] Company: 3 commands + 2 queries + repository + controller + DTOs
+- [x] Agent: 5 commands + 3 queries + repository + controller + DTOs
+- [x] Issue: 4 commands + 4 queries + repository + controller + DTOs
+- [x] Goal: 2 commands + 1 query + repository + controller
+- [x] Project: 3 commands + 2 queries + repository + controller
+- [x] Activity: 1 command + 1 query + repository
+- [x] Dashboard summary query
+- [x] ZodValidationPipe
+- [x] ActivityLogInterceptor
+- [x] CompanyScopeInterceptor
+- [x] HttpExceptionFilter
+- [x] HttpLoggerInterceptor
+- [x] HealthCheckController
+- [x] Agent self controller (GET /agents/me)
+- [x] Agent issue controller (checkout, update, comment)
+- [x] Module registration (shared-module + api-module)
+- [x] Integration test: company CRUD flow
+- [x] Integration test: issue checkout atomicity
 
 ## Success Criteria
 - All CRUD endpoints return correct data with proper status codes

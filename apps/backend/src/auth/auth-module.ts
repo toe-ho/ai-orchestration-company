@@ -39,6 +39,7 @@ import { USER_COMPANY_REPOSITORY } from '../domain/repositories/i-user-company-r
     CompanyAccessGuard,
     CompanyRoleGuard,
     USER_COMPANY_REPOSITORY,
+    TypeOrmModule, // re-export so importing modules can resolve @InjectRepository deps
   ],
 })
 export class AuthModule {}
