@@ -13,6 +13,14 @@ import { ProjectModel } from '../infrastructure/persistence/models/project-model
 import { UserCompanyModel } from '../infrastructure/persistence/models/user-company-model.js';
 import { IssueCommentModel } from '../infrastructure/persistence/models/issue-comment-model.js';
 import { ActivityEntryModel } from '../infrastructure/persistence/models/activity-entry-model.js';
+// Phase 4 models
+import { HeartbeatRunModel } from '../infrastructure/persistence/models/heartbeat-run-model.js';
+import { HeartbeatRunEventModel } from '../infrastructure/persistence/models/heartbeat-run-event-model.js';
+import { CompanyVmModel } from '../infrastructure/persistence/models/company-vm-model.js';
+import { CompanyApiKeyModel } from '../infrastructure/persistence/models/company-api-key-model.js';
+import { AgentRuntimeStateModel } from '../infrastructure/persistence/models/agent-runtime-state-model.js';
+import { AgentTaskSessionModel } from '../infrastructure/persistence/models/agent-task-session-model.js';
+import { AgentWakeupRequestModel } from '../infrastructure/persistence/models/agent-wakeup-request-model.js';
 
 // Repositories
 import { CompanyRepository } from '../infrastructure/repositories/company-repository.js';
@@ -22,6 +30,12 @@ import { GoalRepository } from '../infrastructure/repositories/goal-repository.j
 import { ProjectRepository } from '../infrastructure/repositories/project-repository.js';
 import { ActivityRepository } from '../infrastructure/repositories/activity-repository.js';
 import { IssueCommentRepository } from '../infrastructure/repositories/issue-comment-repository.js';
+// Phase 4 repositories
+import { HeartbeatRunRepository } from '../infrastructure/repositories/heartbeat-run-repository.js';
+import { HeartbeatRunEventRepository } from '../infrastructure/repositories/heartbeat-run-event-repository.js';
+import { CompanyVmRepository } from '../infrastructure/repositories/company-vm-repository.js';
+import { AgentWakeupRepository } from '../infrastructure/repositories/agent-wakeup-repository.js';
+import { AgentRuntimeStateRepository } from '../infrastructure/repositories/agent-runtime-state-repository.js';
 
 // Injection tokens
 import { COMPANY_REPOSITORY } from '../domain/repositories/i-company-repository.js';
@@ -31,6 +45,12 @@ import { GOAL_REPOSITORY } from '../domain/repositories/i-goal-repository.js';
 import { PROJECT_REPOSITORY } from '../domain/repositories/i-project-repository.js';
 import { ACTIVITY_REPOSITORY } from '../domain/repositories/i-activity-repository.js';
 import { ISSUE_COMMENT_REPOSITORY } from '../domain/repositories/i-issue-comment-repository.js';
+// Phase 4 tokens
+import { HEARTBEAT_RUN_REPOSITORY } from '../domain/repositories/i-heartbeat-run-repository.js';
+import { HEARTBEAT_RUN_EVENT_REPOSITORY } from '../domain/repositories/i-heartbeat-run-event-repository.js';
+import { COMPANY_VM_REPOSITORY } from '../domain/repositories/i-company-vm-repository.js';
+import { AGENT_WAKEUP_REPOSITORY } from '../domain/repositories/i-agent-wakeup-repository.js';
+import { AGENT_RUNTIME_STATE_REPOSITORY } from '../domain/repositories/i-agent-runtime-state-repository.js';
 
 // Command handlers
 import { CreateCompanyHandler } from '../application/commands/company/create-company-command.js';
@@ -71,6 +91,9 @@ import { GetDashboardSummaryHandler } from '../application/queries/dashboard/get
 const MODELS = [
   CompanyModel, AgentModel, IssueModel, GoalModel, ProjectModel,
   UserCompanyModel, IssueCommentModel, ActivityEntryModel,
+  // Phase 4
+  HeartbeatRunModel, HeartbeatRunEventModel, CompanyVmModel, CompanyApiKeyModel,
+  AgentRuntimeStateModel, AgentTaskSessionModel, AgentWakeupRequestModel,
 ];
 
 const REPOSITORY_PROVIDERS = [
@@ -82,6 +105,12 @@ const REPOSITORY_PROVIDERS = [
   { provide: ACTIVITY_REPOSITORY, useClass: ActivityRepository },
   { provide: ISSUE_COMMENT_REPOSITORY, useClass: IssueCommentRepository },
   { provide: USER_COMPANY_REPOSITORY, useClass: UserCompanyRepository },
+  // Phase 4
+  { provide: HEARTBEAT_RUN_REPOSITORY, useClass: HeartbeatRunRepository },
+  { provide: HEARTBEAT_RUN_EVENT_REPOSITORY, useClass: HeartbeatRunEventRepository },
+  { provide: COMPANY_VM_REPOSITORY, useClass: CompanyVmRepository },
+  { provide: AGENT_WAKEUP_REPOSITORY, useClass: AgentWakeupRepository },
+  { provide: AGENT_RUNTIME_STATE_REPOSITORY, useClass: AgentRuntimeStateRepository },
 ];
 
 const COMMAND_HANDLERS = [

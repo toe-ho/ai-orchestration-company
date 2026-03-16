@@ -8,8 +8,8 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P1 — core execution loop
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** complete
 - **Description:** Implement the heartbeat lifecycle (10-step orchestrator), execution engine (HTTP POST to VM + SSE parse), Fly.io provisioner (boot/hibernate/destroy VMs), wakeup queue, orphan reaper, and @nestjs/schedule cron.
 
 ## Key Insights
@@ -212,23 +212,23 @@ Agent (self)    ──┘                          │
     - BoardVmController: GET /vm, POST /vm/wake, POST /vm/hibernate
 
 ## Todo List
-- [ ] Flyio client (REST wrapper)
-- [ ] Flyio types
-- [ ] FlyioProvisionerService (ensure/hibernate/destroy)
-- [ ] CompanyVm repository
-- [ ] ExecutionEngineService (HTTP POST + SSE parse)
-- [ ] HeartbeatRun repository
-- [ ] HeartbeatRunEvent repository
-- [ ] AgentWakeupRequest repository
-- [ ] GetHeartbeatContextQuery + handler
-- [ ] InvokeHeartbeatHandler (10-step orchestrator)
-- [ ] WakeupAgentHandler (coalescing)
-- [ ] CancelRunHandler
-- [ ] ReapOrphanedRunsHandler
-- [ ] Domain events (3 events + 3 handlers)
-- [ ] Scheduler module (tick + reaper + pg advisory lock)
-- [ ] Board heartbeat controller + DTOs
-- [ ] Board VM controller + DTOs
+- [x] Flyio client (REST wrapper)
+- [x] Flyio types
+- [x] FlyioProvisionerService (ensure/hibernate/destroy)
+- [x] CompanyVm repository
+- [x] ExecutionEngineService (HTTP POST + SSE parse)
+- [x] HeartbeatRun repository
+- [x] HeartbeatRunEvent repository
+- [x] AgentWakeupRequest repository
+- [x] GetHeartbeatContextQuery + handler
+- [x] InvokeHeartbeatHandler (10-step orchestrator)
+- [x] WakeupAgentHandler (coalescing)
+- [x] CancelRunHandler
+- [x] ReapOrphanedRunsHandler
+- [x] Domain events (3 events + 2 handlers)
+- [x] Scheduler module (tick + reaper + pg advisory lock)
+- [x] Board heartbeat controller + DTOs
+- [x] Board VM controller + DTOs
 - [ ] Integration test: heartbeat invocation (mock VM)
 - [ ] Integration test: orphan reaper
 

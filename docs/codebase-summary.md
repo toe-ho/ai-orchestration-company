@@ -71,7 +71,11 @@ apps/backend/src/
 │   │   └── activity/                          # List
 │   └── services/                              # Application services
 │       ├── impl/                              # Service implementations
-│       └── i-*.ts                             # Service interfaces
+│       ├── interface/                         # Service interfaces
+│       ├── execution-engine-service.ts        # Orchestrates agent execution (Phase 4)
+│       ├── flyio-provisioner-service.ts       # VM provisioning via Fly.io (Phase 4)
+│       ├── scheduler-service.ts               # Heartbeat scheduling (Phase 4)
+│       └── i-*.ts                             # Interface definitions
 ├── infrastructure/                            # Implementation details
 │   ├── persistence/
 │   │   ├── models/                            # TypeORM entities (~13 files)
@@ -113,16 +117,17 @@ apps/backend/src/
 
 | Metric | Count |
 |--------|-------|
-| Controllers | 11 |
-| Command Handlers | 18 |
-| Query Handlers | 14 |
-| Repository Implementations | 9 |
-| Domain Interfaces | 8 |
-| TypeORM Models | 13 |
+| Controllers | 12 |
+| Command Handlers | 22 |
+| Query Handlers | 16 |
+| Repository Implementations | 14 |
+| Domain Interfaces | 10 |
+| TypeORM Models | 17 |
 | Guards | 4 |
-| Config Loaders | 5 |
+| Config Loaders | 6 |
 | Decorators | 5 |
 | Interceptors | 3 |
+| Services (Phase 4) | 4 |
 
 ### Core Entities
 
@@ -138,7 +143,9 @@ apps/backend/src/
 - **AgentApiKey:** Agent authentication token
 - **CompanyApiKey:** Company authentication token
 - **Heartbeat:** Agent health check record
-- **CompanyVM:** Fly.io VM metadata
+- **CompanyVM:** Fly.io VM metadata (Phase 4)
+- **HeartbeatRun:** Execution run tracking (Phase 4)
+- **HeartbeatRunEvent:** Execution event log (Phase 4)
 - **CompanyTemplate:** Pre-built company configuration
 - **Session:** Better Auth session
 
@@ -178,6 +185,10 @@ apps/backend/src/
 | `/api/agents/me` | GET | AgentIssueController | Agent self-info |
 | `/api/agent-issues` | POST/PUT | AgentIssueController | Agent operations |
 | `/api/board/*` | * | BoardController | Board operations |
+| `/api/companies/:cid/runs` | GET/DELETE | RunController | Execution run tracking (Phase 4) |
+| `/api/companies/:cid/vm/wake` | POST | VmController | Wake hibernating VM (Phase 4) |
+| `/api/companies/:cid/vm/hibernate` | POST | VmController | Suspend VM (Phase 4) |
+| `/api/companies/:cid/vm/destroy` | POST | VmController | Destroy VM (Phase 4) |
 
 ## Shared Package (packages/shared)
 
@@ -307,6 +318,53 @@ executor (Fastify)
   └─> adapters (IAdapter plugins)
   └─> adapter-utils (utilities)
 ```
+
+## Phase 4: Heartbeat Engine & Execution (NEW)
+
+**Status:** COMPLETE (Implementation added March 2026)
+
+### Components
+
+**1. Heartbeat Engine**
+- InvokeHeartbeatHandler: 10-step orchestrator for run coordination
+- WakeupAgentHandler: Agent activation with coalescing
+- CancelRunHandler: Cancellation logic
+- ReapOrphanedRunsHandler: Cleanup of stale runs
+
+**2. Execution Engine**
+- ExecutionEngineService: HTTP POST + SSE stream parsing
+- IExecutionRunner interface: Abstraction for runners
+- LocalRunner: Development environment execution
+- CloudRunner: Fly.io cloud execution
+
+**3. VM Provisioner**
+- FlyioProvisionerService: Fly.io Machines API integration
+- CompanyVM tracking: States (stopped → starting → running → hibernating)
+- Machine lifecycle management
+
+**4. Scheduler**
+- SchedulerService: Handles heartbeat ticks & orphan reaping
+- PostgreSQL advisory locks: Prevents duplicate scheduling
+- Runs every 30 seconds
+
+### Infrastructure Additions
+
+**Models & Repositories**
+- 4 new TypeORM models (CompanyVM, HeartbeatRun, HeartbeatRunEvent, etc.)
+- 5 new repository implementations
+- Fly.io REST client integration
+- Redis live event publisher
+
+**Security**
+- AES-256-GCM encryption for API key vault
+- Multi-tenant isolation maintained
+- Execution isolation per company
+
+**New API Endpoints**
+- GET/DELETE /companies/:cid/runs (execution history)
+- POST /companies/:cid/vm/wake (activate VM)
+- POST /companies/:cid/vm/hibernate (suspend VM)
+- POST /companies/:cid/vm/destroy (terminate VM)
 
 ## Build System & Commands
 

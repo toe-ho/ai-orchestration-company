@@ -14,6 +14,10 @@ import { BoardDashboardController } from '../presentation/controllers/impl/board
 import { AgentSelfController } from '../presentation/controllers/impl/agent/agent-self-controller.js';
 import { AgentIssueController } from '../presentation/controllers/impl/agent/agent-issue-controller.js';
 
+// Phase 4 board controllers
+import { BoardHeartbeatController } from '../presentation/controllers/impl/board/board-heartbeat-controller.js';
+import { BoardVmController } from '../presentation/controllers/impl/board/board-vm-controller.js';
+
 // Internal controllers
 import { HealthCheckController } from '../presentation/controllers/impl/internal/health-check-controller.js';
 
@@ -27,6 +31,8 @@ import { HealthCheckController } from '../presentation/controllers/impl/internal
     BoardProjectController,
     BoardActivityController,
     BoardDashboardController,
+    BoardHeartbeatController,
+    BoardVmController,
     AgentSelfController,
     AgentIssueController,
     HealthCheckController,

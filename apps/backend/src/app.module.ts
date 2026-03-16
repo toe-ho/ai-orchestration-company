@@ -12,6 +12,8 @@ import { DatabaseModule } from './infrastructure/persistence/database-module.js'
 import { AuthModule } from './auth/auth-module.js';
 import { SharedModule } from './module/shared-module.js';
 import { ApiModule } from './module/api-module.js';
+import { ExecutionModule } from './module/execution-module.js';
+import { SchedulerModule } from './module/scheduler-module.js';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ApiModule } from './module/api-module.js';
     DatabaseModule,
     AuthModule,
     SharedModule,
+    ExecutionModule,
+    SchedulerModule,
     ApiModule,
   ],
 })
