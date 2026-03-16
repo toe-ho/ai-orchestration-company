@@ -40,7 +40,17 @@ docs/
 
 ## Documentation
 
-See [docs/blueprint/README.md](docs/blueprint/README.md) for the complete technical blueprint.
+### Operational Documentation
+- **[Project Overview & PDR](docs/project-overview-pdr.md)** — Product vision, features, technical architecture
+- **[Codebase Summary](docs/codebase-summary.md)** — File organization, module structure, key statistics
+- **[Code Standards](docs/code-standards.md)** — Naming conventions, patterns, testing guidelines
+- **[System Architecture](docs/system-architecture.md)** — High-level design, data flow, security
+- **[Development Roadmap](docs/project-roadmap.md)** — 9 phases, milestones, dependencies
+- **[Deployment Guide](docs/deployment-guide.md)** — Local setup, production deployment, troubleshooting
+- **[Design Guidelines](docs/design-guidelines.md)** — UI framework, components, accessibility
+
+### Technical Specification
+See [docs/blueprint/README.md](docs/blueprint/README.md) for the complete technical blueprint (25+ detailed specs).
 
 ## Local Dev Setup
 
