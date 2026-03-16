@@ -8,8 +8,8 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P1 — blocks all authenticated endpoints
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** approved
 - **Description:** Integrate Better Auth for user session management (email + OAuth), implement auth guards for both board users and agents, set up company access control.
 
 ## Key Insights
@@ -149,21 +149,21 @@ Request → Guard Layer → Controller
     - CompanyAccessGuard + CompanyRoleGuard stacked where needed
 
 ## Todo List
-- [ ] Install Better Auth + configure
-- [ ] Auth service (Better Auth wrapper)
-- [ ] Auth controller (public routes)
-- [ ] Board auth guard (session cookie)
-- [ ] Agent auth guard (JWT + API key)
-- [ ] Agent JWT service (sign/verify)
-- [ ] Company access guard
-- [ ] Company role guard
-- [ ] All decorators (@CurrentActor, @CompanyId, @RunId, @Roles, @AllowAnonymous)
-- [ ] UserCompany repository (interface + impl)
-- [ ] Hash utility (SHA-256)
-- [ ] Register guards in modules
-- [ ] Test: sign-up → sign-in → get-session flow
-- [ ] Test: agent JWT creation + verification
-- [ ] Test: company access denied for non-member
+- [x] Install Better Auth + configure
+- [x] Auth service (Better Auth wrapper)
+- [x] Auth controller (public routes)
+- [x] Board auth guard (session cookie)
+- [x] Agent auth guard (JWT + API key)
+- [x] Agent JWT service (sign/verify)
+- [x] Company access guard
+- [x] Company role guard
+- [x] All decorators (@CurrentActor, @CompanyId, @RunId, @Roles, @AllowAnonymous)
+- [x] UserCompany repository (interface + impl)
+- [x] Hash utility (SHA-256)
+- [x] Register guards in modules
+- [x] Test: sign-up → sign-in → get-session flow
+- [x] Test: agent JWT creation + verification
+- [x] Test: company access denied for non-member
 
 ## Success Criteria
 - User can sign up with email, sign in, get session

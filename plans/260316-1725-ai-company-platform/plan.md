@@ -20,7 +20,7 @@ Monorepo (`@aicompany/*`) with 3 apps + 3 packages. NestJS backend (CQRS + TypeO
 | # | Phase | Effort | Status | File |
 |---|-------|--------|--------|------|
 | 1 | Monorepo Scaffold + Shared Types + DB | ~20h | complete | [phase-01](./phase-01-monorepo-scaffold-shared-types-db.md) |
-| 2 | Auth — Better Auth Integration | ~12h | pending | [phase-02](./phase-02-auth-better-auth.md) |
+| 2 | Auth — Better Auth Integration | ~12h | complete | [phase-02](./phase-02-auth-better-auth.md) |
 | 3 | Core CRUD — Companies, Agents, Issues | ~20h | pending | [phase-03](./phase-03-core-crud-companies-agents-issues.md) |
 | 4 | Heartbeat + Execution Engine + Provisioner | ~20h | pending | [phase-04](./phase-04-heartbeat-execution-engine-provisioner.md) |
 | 5 | Claude Adapter + Executor App | ~15h | pending | [phase-05](./phase-05-claude-adapter-executor.md) |

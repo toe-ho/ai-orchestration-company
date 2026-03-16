@@ -9,6 +9,7 @@ import { authConfig } from './config/auth-config.js';
 import { redisConfig } from './config/redis-config.js';
 import { flyioConfig } from './config/flyio-config.js';
 import { DatabaseModule } from './infrastructure/persistence/database-module.js';
+import { AuthModule } from './auth/auth-module.js';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DatabaseModule } from './infrastructure/persistence/database-module.js'
     CqrsModule.forRoot(),
     ScheduleModule.forRoot(),
     DatabaseModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

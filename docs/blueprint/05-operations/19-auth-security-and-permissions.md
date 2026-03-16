@@ -29,11 +29,12 @@ Claims: { sub: agentId, company_id, run_id, exp: +48h }
 - 48-hour TTL (configurable)
 
 ### Persistent Agent API Key
-- Created via `POST /api/agents/:id/keys`
-- Returns `pcp_<random>` (shown once)
-- Stored as SHA-256 hash
-- No expiry, revocable
-- For agents that need long-lived access
+- **Creation:** `POST /api/agents/:id/keys`
+- **Format:** `pcp_<random>` (shown once only)
+- **Storage:** SHA-256 hash in `agent_api_keys` table
+- **Expiry:** None (revocable via `DELETE /api/agents/:id/keys/:keyId`)
+- **Validation:** `hashApiKey()` utility compares provided key against stored hash
+- **Use Case:** Agents needing long-lived access without heartbeat JWT
 
 ### X-Run-Id Header (Audit Trail)
 All agent mutations must include:
@@ -77,27 +78,62 @@ Anthropic: GET /v1/models (with key)
   → 429: Rate limited → valid but throttled ⚠️
 ```
 
+## Authentication Implementation (Phase 2)
+
+### Better Auth Integration
+- **Service:** `AuthService` wraps `betterAuth()`
+- **Database:** Dedicated `pg.Pool` (not TypeORM)
+- **Tables:** `users`, `sessions`, `accounts`, `verification` (snake_case fields)
+- **Session Expiry:** 30 days (configurable)
+- **Field Mapping:** All camelCase defaults mapped to snake_case (e.g., `emailVerified` → `email_verified`)
+
+### Guards (Global & Per-Route)
+
+| Guard | Purpose | Auth Method |
+|-------|---------|-------------|
+| `BoardAuthGuard` | Default protection (APP_GUARD) | Session cookie via Better Auth |
+| `AgentAuthGuard` | Agent callback endpoints | Bearer JWT or pcp_ API key |
+| `CompanyAccessGuard` | Verify actor in company | Checks actor.companyId in resource |
+| `CompanyRoleGuard` | Role-based access | Enforces @Roles() decorator |
+
+**Usage:**
+```typescript
+@Post('/agents')
+@Roles('owner', 'admin')  // Requires owner or admin role
+async createAgent(@Body() dto: CreateAgentDto) { ... }
+
+@Post('/auth/sign-in')
+@AllowAnonymous()  // Bypass BoardAuthGuard
+async signIn(@Body() dto: SignInDto) { ... }
+```
+
+### Decorators
+
+| Decorator | Extracts | Example |
+|-----------|----------|---------|
+| `@CurrentActor()` | Request actor | `constructor(actor: IActor)` |
+| `@CompanyId()` | Company UUID | `async create(@CompanyId() companyId: string)` |
+| `@RunId()` | X-Run-Id header | `async update(@RunId() runId: string)` |
+| `@AllowAnonymous()` | Skip BoardAuthGuard | `@AllowAnonymous()` |
+| `@Roles(...)` | Require roles | `@Roles('owner', 'admin')` |
+
 ## Actor Model
 
-Every request resolves to one of three actor types:
+Every request resolves to one of three actor types via `IActor`:
 
 ```typescript
-req.actor = {
-  type: "user" | "agent" | "none",
-
-  // User
-  userId?: string,
-  companyIds?: string[],
-  companyRoles?: Map<string, string>,
-
-  // Agent
-  agentId?: string,
-  companyId?: string,  // Agents are single-company
-  runId?: string,
-
-  source: "session" | "agent_jwt" | "agent_key" | "none"
+interface IActor {
+  type: ActorType;          // "board" | "agent" | "system"
+  userId?: string;          // User ID (board actors only)
+  agentId?: string;         // Agent ID (agent actors only)
+  companyId?: string;       // Company UUID (all types)
+  runId?: string;           // Heartbeat run UUID (agent actors only)
 }
 ```
+
+Set by guards:
+- **BoardAuthGuard:** type = "board", userId set from session
+- **AgentAuthGuard:** type = "agent", agentId/companyId from JWT payload
 
 ### Authorization Checks
 - **Company access:** User must be member. Agent must be in same company.

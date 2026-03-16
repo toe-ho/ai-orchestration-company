@@ -39,6 +39,8 @@ A web platform where users create AI companies staffed entirely by AI agents. Us
 | 10 | [Data Flow](03-architecture/10-data-flow.md) | End-to-end request lifecycle diagrams | |
 | 11 | [Backend Architecture](03-architecture/11-backend-architecture.md) | NestJS overview, clean architecture layers | |
 | 12 | [API Architecture (NestJS)](03-architecture/12-api-architecture-nestjs.md) | Full CQRS structure, TypeORM models, modules | **Critical** |
+| 12a | [Authentication Architecture](03-architecture/12a-auth-architecture.md) | Better Auth, guards, decorators, IActor (Phase 2) | **High** |
+| 12b | [Auth Quick Reference](03-architecture/12b-auth-quick-reference.md) | Common auth patterns, usage examples | |
 | 13 | [Frontend & UI](03-architecture/13-frontend-and-ui.md) | React app, folder structure, non-tech UX | |
 | 14 | [Monorepo Setup Guide](03-architecture/14-monorepo-setup-guide.md) | Turborepo + pnpm, build order, Docker, CI/CD | |
 

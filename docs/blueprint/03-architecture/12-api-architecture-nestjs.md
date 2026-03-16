@@ -465,6 +465,18 @@ apps/backend/src/
 │       └── RealtimeGateway.ts                 # @WebSocketGateway — live events
 │
 │ ─────────────────────────────────────────────
+│  AUTH LAYER (Phase 2)
+│ ─────────────────────────────────────────────
+│
+├── auth/
+│   ├── auth-module.ts                         # Configures Better Auth, guards, services
+│   │
+│   └── (Exports: AuthService, AgentJwtService, guards)
+│
+├── utils/
+│   └── hash.ts                                # SHA-256 API key hashing
+│
+│ ─────────────────────────────────────────────
 │  CROSS-CUTTING CONCERNS
 │ ─────────────────────────────────────────────
 │
@@ -472,19 +484,21 @@ apps/backend/src/
 │   ├── api.module.ts                          # HTTP controllers
 │   ├── scheduler.module.ts                    # Heartbeat timer + cron jobs (@nestjs/schedule)
 │   ├── realtime.module.ts                     # WebSocket + Redis pub/sub
-│   └── shared.module.ts                       # Shared providers (repos, services)
+│   ├── shared.module.ts                       # Shared providers (repos, services)
+│   └── auth.module.ts                         # AuthModule (imported by app.module)
 │
-├── guard/
-│   ├── BoardAuthGuard.ts                      # Session cookie auth
-│   ├── AgentAuthGuard.ts                      # JWT or API key auth
-│   ├── CompanyAccessGuard.ts                  # Verify actor has company access
-│   └── CompanyRoleGuard.ts                    # owner/admin/viewer check
+├── guard/                                     # Guards registered by AuthModule
+│   ├── board-auth-guard.ts                    # Session cookie auth (APP_GUARD global)
+│   ├── agent-auth-guard.ts                    # Bearer JWT or pcp_ API key
+│   ├── company-access-guard.ts                # Verify actor has company access
+│   └── company-role-guard.ts                  # owner/admin/viewer check
 │
-├── decorator/
-│   ├── CurrentActor.ts                        # @CurrentActor() → IActor
-│   ├── CompanyId.ts                           # @CompanyId() → UUID from route/actor
-│   ├── RunId.ts                               # @RunId() → from X-Run-Id header
-│   └── Roles.ts                               # @Roles('owner', 'admin')
+├── decorator/                                 # Parameter extraction & metadata
+│   ├── allow-anonymous.ts                     # @AllowAnonymous() → bypass BoardAuthGuard
+│   ├── current-actor.ts                       # @CurrentActor() → IActor
+│   ├── company-id.ts                          # @CompanyId() → UUID from route/actor
+│   ├── run-id.ts                              # @RunId() → from X-Run-Id header
+│   └── roles.ts                               # @Roles('owner', 'admin')
 │
 ├── interceptor/
 │   ├── ActivityLogInterceptor.ts              # Auto-log mutations to activityLog
@@ -750,6 +764,18 @@ export class AgentIssueController {
   }
 }
 ```
+
+## Authentication Layer (Phase 2)
+
+Complete authentication system with guards, decorators, and Better Auth integration.
+
+See **[12a — Authentication Architecture](12a-auth-architecture.md)** for detailed auth documentation including:
+- Better Auth 1.5.5 configuration
+- Guard hierarchy and behavior
+- Decorator usage
+- IActor interface
+- API key management
+- Security considerations
 
 ## Module Registration
 

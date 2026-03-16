@@ -13,6 +13,7 @@ import { UserCompanyModel } from './models/user-company-model.js';
 import { CompanyTemplateModel } from './models/company-template-model.js';
 import { UserModel } from './models/user-model.js';
 import { SessionModel } from './models/session-model.js';
+import { AgentApiKeyModel } from './models/agent-api-key-model.js';
 
 const CORE_MODELS = [
   CompanyModel,
@@ -27,6 +28,7 @@ const CORE_MODELS = [
   CompanyTemplateModel,
   UserModel,
   SessionModel,
+  AgentApiKeyModel,
 ];
 
 @Module({

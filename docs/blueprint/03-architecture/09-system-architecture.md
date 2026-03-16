@@ -10,18 +10,23 @@
                     │  (cloud-hosted)     │
                     └─────────┬──────────┘
                               │ HTTPS / WebSocket
+                              │ (session cookie)
                               │
                     ┌─────────┴──────────────────────┐
                     │   CONTROL PLANE                 │
                     │   (NestJS API + Scheduler)      │
                     ├────────────────────────────────┤
-                    │  Controllers (CQRS dispatch)    │
-                    │  Commands + Queries (handlers)  │
-                    │  Heartbeat Scheduler            │
-                    │  Execution Engine               │
-                    │  Auth (multi-tenant)            │
-                    │  Cost Tracking                  │
-                    │  Real-time Events (Redis)       │
+                    │  ┌─ Auth Layer (Phase 2)       │
+                    │  │ ├─ BoardAuthGuard (global) │
+                    │  │ ├─ AgentAuthGuard          │
+                    │  │ ├─ Guards & Decorators     │
+                    │  │ └─ Better Auth (sessions)  │
+                    │  ├─ Controllers (CQRS)         │
+                    │  ├─ Commands + Queries         │
+                    │  ├─ Heartbeat Scheduler        │
+                    │  ├─ Execution Engine           │
+                    │  ├─ Cost Tracking              │
+                    │  └─ Real-time Events (Redis)   │
                     └──┬─────────────┬───────────────┘
                        │             │
             ┌──────────┘             └──────────┐
