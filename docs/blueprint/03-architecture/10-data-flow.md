@@ -1,4 +1,4 @@
-# 12 — Data Flow
+# 10 — Data Flow
 
 ## Flow 1: Non-Tech User Creates Company from Template
 

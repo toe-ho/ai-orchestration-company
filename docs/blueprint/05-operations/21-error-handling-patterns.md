@@ -1,4 +1,4 @@
-# 27 — Error Handling Patterns
+# 21 — Error Handling Patterns
 
 Error handling strategy for the AI Company Platform (NestJS + TypeORM + CQRS).
 

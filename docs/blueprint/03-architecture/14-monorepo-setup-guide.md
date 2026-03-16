@@ -1,4 +1,4 @@
-# 24 — Monorepo Setup Guide
+# 14 — Monorepo Setup Guide
 
 Turborepo + pnpm workspaces setup for the AI Company Platform.
 
@@ -16,10 +16,9 @@ Turborepo + pnpm workspaces setup for the AI Company Platform.
 ```
 your-product/
 ├── apps/
-│   ├── api/                ← NestJS API (CQRS)
+│   ├── backend/            ← NestJS API + Scheduler (CQRS, @nestjs/schedule)
 │   ├── web/                ← React frontend (Vite)
-│   ├── executor/           ← Agent Executor (Fly.io VM)
-│   └── scheduler/          ← Heartbeat scheduler (separate process)
+│   └── executor/           ← Agent Executor (Fly.io VM)
 ├── packages/
 │   ├── shared/             ← Types, constants, validators (Zod)
 │   ├── adapters/           ← Agent runtime integrations
@@ -52,7 +51,7 @@ packages:
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
-    "db:migrate": "turbo db:migrate --filter=@your-product/api"
+    "db:migrate": "turbo db:migrate --filter=@your-product/backend"
   },
   "devDependencies": {
     "turbo": "^2.0.0",
@@ -103,13 +102,12 @@ packages/adapter-utils   ← depends on shared
     ↑
 packages/adapters        ← depends on shared + adapter-utils
     ↑
-apps/api                 ← depends on shared
+apps/backend             ← depends on shared + @nestjs/schedule
 apps/web                 ← depends on shared
 apps/executor            ← depends on shared + adapters + adapter-utils
-apps/scheduler           ← depends on shared (imports api's SharedModule)
 ```
 
-**Build order enforced by Turborepo:** `shared` → `adapter-utils` → `adapters` → `api` / `web` / `executor` / `scheduler`
+**Build order enforced by Turborepo:** `shared` → `adapter-utils` → `adapters` → `backend` / `web` / `executor`
 
 ## Package Configurations
 
@@ -153,15 +151,16 @@ Contains: entity interfaces, enums, Zod schemas, API path constants. No runtime 
 }
 ```
 
-### apps/api
+### apps/backend
 
 ```json
 {
-  "name": "@your-product/api",
+  "name": "@your-product/backend",
   "dependencies": {
     "@your-product/shared": "workspace:*",
     "@nestjs/core": "^10.0.0",
     "@nestjs/cqrs": "^10.0.0",
+    "@nestjs/schedule": "^4.0.0",
     "@nestjs/typeorm": "^10.0.0",
     "typeorm": "^0.3.0"
   }
@@ -187,11 +186,11 @@ Contains: entity interfaces, enums, Zod schemas, API path constants. No runtime 
 # Install all dependencies
 pnpm install
 
-# Run api + web in parallel (turbo handles ordering)
+# Run backend + web in parallel (turbo handles ordering)
 turbo dev
 
-# Run only the API
-turbo dev --filter=@your-product/api
+# Run only the backend
+turbo dev --filter=@your-product/backend
 
 # Run only the web app
 turbo dev --filter=@your-product/web
@@ -206,10 +205,10 @@ turbo typecheck
 turbo test
 
 # Add a dependency to a specific app
-pnpm --filter @your-product/api add some-package
+pnpm --filter @your-product/backend add some-package
 ```
 
-`turbo dev` starts `apps/api` and `apps/web` in parallel. Turborepo ensures `packages/shared` is compiled first (since both depend on it).
+`turbo dev` starts `apps/backend` and `apps/web` in parallel. Turborepo ensures `packages/shared` is compiled first (since both depend on it).
 
 ## Docker Build for Executor (Fly.io VM Image)
 
@@ -253,9 +252,8 @@ Deploy the executor image to Fly.io as a Machine template. The `FlyioProvisioner
 Environment variables are **not shared** across packages via Turborepo — each app manages its own `.env` file.
 
 ```
-apps/api/.env           ← DATABASE_URL, REDIS_URL, JWT_SECRET, FLYIO_API_TOKEN, etc.
+apps/backend/.env       ← DATABASE_URL, REDIS_URL, JWT_SECRET, FLYIO_API_TOKEN, etc.
 apps/web/.env           ← VITE_API_BASE_URL
-apps/scheduler/.env     ← DATABASE_URL (same as api, for pg advisory lock)
 apps/executor/.env      ← injected at runtime by provisioner (not committed)
 ```
 
@@ -263,7 +261,7 @@ Use `.env.example` files (committed) to document required variables. Never commi
 
 For CI/CD secrets, inject via environment variables in the pipeline — not via `.env` files.
 
-The `packages/shared` package does **not** read env vars. Config parsing happens only in `apps/api/src/config/` using NestJS `ConfigModule`.
+The `packages/shared` package does **not** read env vars. Config parsing happens only in `apps/backend/src/config/` using NestJS `ConfigModule`.
 
 ## CI/CD Pipeline with Turborepo Cache
 
@@ -295,8 +293,8 @@ jobs:
       # Deploy (only on main branch)
       - if: github.ref == 'refs/heads/main'
         run: |
-          turbo build --filter=@your-product/api
-          flyctl deploy --config apps/api/fly.toml
+          turbo build --filter=@your-product/backend
+          flyctl deploy --config apps/backend/fly.toml
 ```
 
 Pipeline order: `typecheck → test → build → deploy`

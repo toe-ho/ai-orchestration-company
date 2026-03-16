@@ -1,4 +1,4 @@
-# 02 — System Architecture
+# 09 — System Architecture
 
 ## High-Level Architecture
 
@@ -111,10 +111,9 @@ class ExecutionEngine {
 ```
 your-product/
 ├── apps/
-│   ├── api/                ← NestJS API (CQRS)
+│   ├── backend/            ← NestJS API + Scheduler (CQRS, @nestjs/schedule)
 │   ├── web/                ← React frontend (Vite)
-│   ├── executor/           ← Agent Executor (Fly.io VM)
-│   └── scheduler/          ← Heartbeat scheduler (separate process)
+│   └── executor/           ← Agent Executor (Fly.io VM)
 ├── packages/
 │   ├── shared/             ← Types, constants, validators
 │   ├── adapters/           ← Agent runtime integrations

@@ -1,4 +1,4 @@
-# 20 — Agent Executor Specification
+# 07 — Agent Executor Specification
 
 The Agent Executor is a lightweight Node.js process that runs inside each Fly.io VM. It receives execution requests from the control plane, spawns agent processes, and streams results back.
 
@@ -193,8 +193,13 @@ data: <json_payload>
      API_URL: process.env.CONTROL_PLANE_URL,
      API_KEY: request.authToken,
 
-     // User's LLM API key (from encrypted vault)
-     ANTHROPIC_API_KEY: request.apiKey,  // or OPENAI_API_KEY, etc.
+     // API key injection — explicit mapping from provider to env var
+     const apiKeyEnvMap = {
+       anthropic: 'ANTHROPIC_API_KEY',
+       openai: 'OPENAI_API_KEY',
+       google: 'GOOGLE_API_KEY',
+     };
+     env[apiKeyEnvMap[request.apiKeyProvider]] = request.apiKey;
 
      // Wake context
      TASK_ID: request.context.taskId,

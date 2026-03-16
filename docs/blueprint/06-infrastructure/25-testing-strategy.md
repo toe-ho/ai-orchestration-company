@@ -1,4 +1,4 @@
-# 26 — Testing Strategy
+# 25 — Testing Strategy
 
 Testing approach for the AI Company Platform (NestJS + TypeORM + CQRS).
 

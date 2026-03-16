@@ -1,4 +1,4 @@
-# 22 — API Response Schemas
+# 18 — API Response Schemas
 
 Exact JSON shapes for the most critical API endpoints. These are what agents and the UI consume.
 

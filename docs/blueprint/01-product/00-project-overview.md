@@ -81,7 +81,7 @@ Platform
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React, Vite, Tailwind CSS, shadcn/ui, React Query |
-| Backend | Node.js, Express, TypeScript |
+| Backend | Node.js, NestJS, TypeScript, @nestjs/schedule |
 | Database | PostgreSQL (Neon/Supabase managed) |
 | Auth | Better Auth (sessions), Agent JWT, encrypted API keys |
 | Execution | Fly.io Machines (per-company VMs) |

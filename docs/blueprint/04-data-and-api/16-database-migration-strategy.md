@@ -1,17 +1,17 @@
-# 25 — Database Migration Strategy
+# 16 — Database Migration Strategy
 
 TypeORM migrations, partitioning, archival, and index strategy for the AI Company Platform.
 
 ## TypeORM Migration Workflow
 
-Migrations live in `apps/api/src/infrastructure/persistence/migrations/`.
+Migrations live in `apps/backend/src/infrastructure/persistence/migrations/`.
 
 ### Generate a Migration
 
 After modifying a TypeORM entity model, generate a migration automatically:
 
 ```bash
-# From apps/api/
+# From apps/backend/
 pnpm typeorm migration:generate \
   src/infrastructure/persistence/migrations/{timestamp}-{description} \
   -d src/infrastructure/persistence/data-source.ts
@@ -26,7 +26,7 @@ TypeORM diffs the current schema against the database and writes a migration fil
 pnpm typeorm migration:run -d src/infrastructure/persistence/data-source.ts
 
 # Shortcut via turbo
-turbo db:migrate --filter=@your-product/api
+turbo db:migrate --filter=@your-product/backend
 ```
 
 In production, migrations run automatically on API startup via `data-source.ts` config (`migrationsRun: true`).

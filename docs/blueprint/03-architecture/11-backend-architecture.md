@@ -1,6 +1,6 @@
-# 04 — Backend Architecture
+# 11 — Backend Architecture
 
-High-level overview of the NestJS API server. For full directory structure and code examples, see [23 — API Architecture (NestJS + TypeORM + CQRS)](23-api-architecture-nestjs.md).
+High-level overview of the NestJS API server. For full directory structure and code examples, see [12 — API Architecture (NestJS + TypeORM + CQRS)](12-api-architecture-nestjs.md).
 
 ## Framework & Stack
 
@@ -93,7 +93,7 @@ NestJS modules group related providers. Key modules:
 |--------|---------|
 | `SharedModule` | Global — all repositories, services, command/query/event handlers |
 | `ApiModule` | HTTP controllers (board, agent, internal, public routes) |
-| `SchedulerModule` | Heartbeat timer + cron jobs (separate process) |
+| `SchedulerModule` | Heartbeat timer + cron jobs (@nestjs/schedule, pg advisory lock) |
 | `RealtimeModule` | WebSocket gateway + Redis pub/sub bridge |
 
 The `SharedModule` is `@Global()` so repositories and services are available everywhere without re-importing.
@@ -124,7 +124,7 @@ Application services implement cross-cutting concerns behind interfaces. Handler
 7. On completion: record cost event, update `AgentRuntimeState`, check budget
 8. Schedule idle VM hibernate after 10 minutes
 
-The scheduler runs as a **separate process** (`apps/scheduler/`) with a **pg advisory lock** to prevent duplicate execution when multiple API instances are deployed. Every 30 seconds it runs:
+The scheduler runs as a **built-in module** within `apps/backend/` using `@nestjs/schedule`. It acquires a **pg advisory lock** to prevent duplicate execution when multiple API replicas are deployed. Every 30 seconds it runs:
 1. `ReapOrphanedRunsCommand` — clean stale runs (>5 min without update)
 2. Resume queued runs
 3. `tickTimers` — enqueue runs for agents whose heartbeat interval has elapsed
@@ -184,11 +184,11 @@ NestJS cross-cutting concerns applied at the controller level:
 **Pipe:**
 - `ZodValidationPipe` — validates request DTOs against Zod schemas; returns 400 with field-level errors on failure
 
-## Scheduler (Separate Process)
+## Scheduler (Built-in Module)
 
-The heartbeat scheduler runs as `apps/scheduler/` — a standalone NestJS app that imports only `SharedModule`. It acquires a **PostgreSQL advisory lock** on startup so only one instance runs the tick loop at a time, making it safe to run alongside multiple API replicas.
+The heartbeat scheduler runs as `SchedulerModule` within `apps/backend/` using `@nestjs/schedule`. It acquires a **PostgreSQL advisory lock** on each tick so only one replica runs the tick loop at a time, making it safe in multi-replica deployments.
 
-Tick interval: 30 seconds.
+Tick interval: 30 seconds (`@Interval(30000)`).
 
 ## Controller Routing
 

@@ -1,4 +1,4 @@
-# 09 — Agent Workflow (Heartbeat Loop + Self-Hiring)
+# 04 — Agent Workflow (Heartbeat Loop + Self-Hiring)
 
 ## Core Concept: Heartbeat Model
 

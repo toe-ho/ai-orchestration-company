@@ -1,4 +1,4 @@
-# 21 — Adapter Implementation Guide
+# 08 — Adapter Implementation Guide
 
 Each adapter handles the specifics of spawning, communicating with, and parsing output from a particular AI agent CLI. This document provides the implementation detail for each adapter.
 

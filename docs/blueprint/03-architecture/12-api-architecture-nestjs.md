@@ -1,4 +1,4 @@
-# 23 — API Architecture (NestJS + TypeORM + CQRS)
+# 12 — API Architecture (NestJS + TypeORM + CQRS)
 
 Full backend architecture using NestJS with Clean Architecture, TypeORM for persistence, and CQRS for command/query separation.
 
@@ -7,10 +7,9 @@ Full backend architecture using NestJS with Clean Architecture, TypeORM for pers
 ```
 your-product/
 ├── apps/
-│   ├── api/                        ← NestJS API server
+│   ├── backend/                    ← NestJS API + Scheduler (@nestjs/schedule)
 │   ├── web/                        ← React frontend (Vite)
-│   ├── executor/                   ← Agent Executor (Fly.io VM)
-│   └── scheduler/                  ← Heartbeat scheduler (separate process)
+│   └── executor/                   ← Agent Executor (Fly.io VM)
 ├── packages/
 │   ├── shared/                     ← Types, constants, validators (Zod)
 │   ├── adapters/                   ← Agent runtime integrations
@@ -25,7 +24,7 @@ your-product/
 ## API Directory Structure
 
 ```
-apps/api/src/
+apps/backend/src/
 ├── main.ts                                    # Bootstrap + entry point
 ├── app.module.ts                              # Root module
 │
@@ -471,7 +470,7 @@ apps/api/src/
 │
 ├── module/                                    # NestJS module definitions
 │   ├── api.module.ts                          # HTTP controllers
-│   ├── scheduler.module.ts                    # Heartbeat timer + cron jobs
+│   ├── scheduler.module.ts                    # Heartbeat timer + cron jobs (@nestjs/schedule)
 │   ├── realtime.module.ts                     # WebSocket + Redis pub/sub
 │   └── shared.module.ts                       # Shared providers (repos, services)
 │

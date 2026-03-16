@@ -1,4 +1,4 @@
-# 08 — AI Workflow (Full Lifecycle)
+# 03 — AI Workflow (Full Lifecycle)
 
 This is the most critical document. Traces the complete lifecycle of an agent execution.
 

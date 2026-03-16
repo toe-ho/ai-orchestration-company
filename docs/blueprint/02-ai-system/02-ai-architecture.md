@@ -1,4 +1,4 @@
-# 07 — AI Architecture
+# 02 — AI Architecture
 
 ## Important Distinction
 

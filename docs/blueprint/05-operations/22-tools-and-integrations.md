@@ -1,4 +1,4 @@
-# 11 — Tools & Integrations
+# 22 — Tools & Integrations
 
 ## Adapter System (9+ Agent Runtimes)
 

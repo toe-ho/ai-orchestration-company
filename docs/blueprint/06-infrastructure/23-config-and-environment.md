@@ -1,4 +1,4 @@
-# 16 — Config & Environment
+# 23 — Config & Environment
 
 ## Environment Variables
 
@@ -81,6 +81,19 @@ S3_REGION=us-east-1
 # Encryption
 ENCRYPTION_KEY=<generate>            # openssl rand -base64 32
 ```
+
+## Executor Environment Variables (Injected at Runtime)
+
+These variables are injected into the Fly.io VM by the provisioner at boot time. Not committed to `.env` files.
+
+| Variable | Description |
+|----------|-------------|
+| `CONTROL_PLANE_URL` | Backend API base URL for agent callbacks |
+| `COMPANY_ID` | UUID of the company this VM serves |
+| `AGENT_JWT_SECRET` | Secret for verifying agent JWTs |
+| `ANTHROPIC_API_KEY` | User's LLM key (if adapter is Claude) |
+| `OPENAI_API_KEY` | User's LLM key (if adapter is Codex/OpenAI) |
+| `GOOGLE_API_KEY` | User's LLM key (if adapter is Gemini) |
 
 ## Docker
 

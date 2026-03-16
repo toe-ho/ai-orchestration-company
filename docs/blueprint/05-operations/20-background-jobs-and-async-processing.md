@@ -1,16 +1,22 @@
-# 15 — Background Jobs & Async Processing
+# 20 — Background Jobs & Async Processing
 
-## Heartbeat Scheduler (Core Job)
+## Heartbeat Scheduler (Built-in Module)
+
+The scheduler runs inside `apps/backend/` as `SchedulerModule` using `@nestjs/schedule`. No separate process needed.
 
 ### How It Works
 ```
-Server startup
+Backend startup
+    │
+    ├── @nestjs/schedule registers interval job
     │
     ▼
-setInterval(tick, 30000)    ← Every 30 seconds
+@Interval(30000)  tick()    ← Every 30 seconds
+    │
+    ├── Acquire pg advisory lock (skip if another replica holds it)
     │
     ▼
-Each tick:
+Each tick (only if lock acquired):
   1. reapOrphanedRuns()      — Stale runs (>5 min) → "failed"
   2. resumeQueuedRuns()      — Resume runs queued before restart
   3. tickTimers(now)         — Check heartbeat intervals, enqueue runs
@@ -143,7 +149,7 @@ Clients consume:
 
 All async processing is:
 - **Database-backed:** Wakeup requests table for task queue
-- **Timer-based:** setInterval for scheduler
+- **Built-in scheduler:** `@nestjs/schedule` `@Interval()` inside backend, pg advisory lock for multi-replica safety
 - **Redis:** Only for pub/sub events, not job queues
 
 Simple, zero-dependency approach. External job queues (BullMQ, etc.) can be added later if needed.

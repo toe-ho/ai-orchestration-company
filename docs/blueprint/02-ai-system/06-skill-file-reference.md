@@ -1,4 +1,4 @@
-# 19 — Skill File Reference (Complete Agent Instruction Document)
+# 06 — Skill File Reference (Complete Agent Instruction Document)
 
 This is the **exact content** that goes into `skills/task-protocol/SKILL.md` — the master instruction document every agent receives. This file is the single most important piece of the system. Without it, agents don't know how to interact with the platform.
 

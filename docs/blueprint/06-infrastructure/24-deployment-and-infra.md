@@ -1,4 +1,4 @@
-# 17 — Deployment & Infrastructure
+# 24 — Deployment & Infrastructure
 
 ## Cloud Infrastructure Map
 
@@ -148,6 +148,15 @@ CMD ["node", "index.js"]
 ```
 
 Pre-installed agent CLIs. Listens for execution requests from the control plane.
+
+## Scheduler in Multi-Replica Deployments
+
+The heartbeat scheduler runs inside `apps/backend/` via `@nestjs/schedule`. When deploying multiple backend replicas:
+
+- **PostgreSQL advisory lock** prevents duplicate tick execution — only one replica runs the scheduler tick at a time
+- If the lock holder crashes, the lock is automatically released and another replica picks up
+- No configuration needed — the lock is acquired per-tick (not per-startup), so failover is immediate
+- Safe to scale to N replicas without scheduler conflicts
 
 ## Database Hosting
 
