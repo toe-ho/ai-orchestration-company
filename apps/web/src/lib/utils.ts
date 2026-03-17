@@ -1,4 +1,6 @@
-/** Merge class names (install clsx + tailwind-merge when adding shadcn components) */
-export function cn(...classes: (string | undefined | null | boolean)[]): string {
-  return classes.filter(Boolean).join(' ');
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }

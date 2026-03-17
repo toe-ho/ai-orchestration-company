@@ -4,15 +4,15 @@
 
 AI Company Platform is a monorepo built with **pnpm workspaces** and **Turborepo**. It comprises three applications (backend, web, executor) and three shared packages (shared types, adapters, adapter utilities).
 
-**Total:** ~380+ TypeScript files across all apps/packages, ~8,200 LOC (excluding node_modules and migrations). Phase 5 adds ~2,300 LOC across executor app + adapter infrastructure.
+**Total:** ~428 TypeScript files across all apps/packages, ~10,213 LOC (excluding node_modules and migrations). Phase 6 adds ~2,013 LOC across web frontend.
 
 ## Directory Structure & LOC Breakdown
 
 ```
 ai-orchestration-company/
-├── apps/                          (~130 files, ~6,500 LOC)
+├── apps/                          (~178 files, ~8,513 LOC)
 │   ├── backend/                   (~120 files, ~3,969 LOC)
-│   ├── web/                       (~3 files, ~150 LOC)
+│   ├── web/                       (~48 files, ~2,013 LOC) — Phase 6 Complete
 │   └── executor/                  (~7 files, ~2,381 LOC) — Phase 5 Complete
 ├── packages/                      (~70 files, ~2,100 LOC)
 │   ├── shared/                    (~51 files, ~1,400 LOC)
@@ -286,13 +286,119 @@ interface ISessionCodec {
 
 ## Web Application (apps/web)
 
-**Status:** Placeholder (React 19 + Vite setup, ~150 LOC)
+**Status:** COMPLETE (Phase 6) — ~2,013 LOC, 48 files
 
 **Purpose:** Frontend for user/company/agent management
 
-**Stack:** React 19, Vite, Tailwind CSS 4, shadcn/ui, React Query, React Router 6
+**Stack:** React 19, Vite, Tailwind CSS 4, shadcn/ui, React Query v5, React Router v6
 
-**Pending:** All pages and components
+### File Organization
+
+```
+apps/web/src/
+├── main.tsx                                    # Vite entry point
+├── app.tsx                                     # Root route setup
+├── pages/                                      # Page components
+│   ├── auth/
+│   │   ├── sign-in-page.tsx
+│   │   └── sign-up-page.tsx
+│   ├── dashboard/
+│   │   └── dashboard-page.tsx
+│   ├── agents/
+│   │   ├── agents-list-page.tsx
+│   │   └── agent-detail-page.tsx
+│   ├── issues/
+│   │   ├── issues-list-page.tsx
+│   │   └── issue-detail-page.tsx
+│   ├── runs/
+│   │   └── run-detail-page.tsx
+│   └── settings/
+│       ├── company-settings-page.tsx
+│       ├── api-keys-page.tsx
+│       └── members-page.tsx
+├── components/                                 # Reusable components (~28 files)
+│   ├── layout/
+│   │   ├── app-shell.tsx
+│   │   ├── sidebar.tsx
+│   │   ├── top-bar.tsx
+│   │   └── breadcrumbs.tsx
+│   ├── agents/
+│   │   ├── agent-card.tsx
+│   │   ├── agent-status-badge.tsx
+│   │   └── org-chart.tsx
+│   ├── issues/
+│   │   ├── issue-card.tsx
+│   │   ├── issue-status-badge.tsx
+│   │   ├── kanban-board.tsx
+│   │   └── kanban-column.tsx
+│   ├── runs/
+│   │   ├── run-event-stream.tsx
+│   │   └── run-card.tsx
+│   └── shared/
+│       ├── protected-route.tsx
+│       ├── empty-state.tsx
+│       ├── confirm-dialog.tsx
+│       └── status-badge.tsx
+├── providers/                                  # Context providers (~3 files)
+│   ├── auth-provider.tsx
+│   ├── company-provider.tsx
+│   └── theme-provider.tsx
+├── hooks/                                      # Custom hooks (~3 files)
+│   ├── use-auth.ts
+│   ├── use-company.ts
+│   └── use-theme.ts
+├── lib/                                        # Utilities & API clients
+│   ├── api-client.ts                           # Base fetch wrapper
+│   ├── query-keys.ts                           # React Query keys
+│   ├── utils.ts                                # Helper functions
+│   └── api/                                    # Domain-specific API modules (~9 files)
+│       ├── auth-api.ts
+│       ├── companies-api.ts
+│       ├── agents-api.ts
+│       ├── issues-api.ts
+│       ├── goals-api.ts
+│       ├── projects-api.ts
+│       ├── dashboard-api.ts
+│       ├── heartbeat-runs-api.ts
+│       └── vm-api.ts
+└── [tailwind config, vite config]
+```
+
+### Key Features
+
+**Pages (11 total):**
+- Sign In & Sign Up (auth flow)
+- Dashboard (company metrics + recent activity)
+- Agents List & Detail (with org chart)
+- Issues List & Detail (with checkout/release)
+- Run Detail (execution history)
+- Settings (company, API keys, members)
+
+**Components (28 total):**
+- Layout: AppShell, Sidebar, TopBar (company switcher, dark mode, user menu), Breadcrumbs
+- Agents: AgentCard, AgentStatusBadge, OrgChart
+- Issues: IssueCard, IssueStatusBadge, KanbanBoard
+- Runs: RunEventStream (real-time events), RunCard
+- Shared: ProtectedRoute, EmptyState, ConfirmDialog, StatusBadge
+
+**Providers (3):**
+- AuthProvider (Better Auth session management)
+- CompanyProvider (current company context)
+- ThemeProvider (dark/light mode)
+
+**API Client Layer (9 domain modules):**
+- Base fetch wrapper with error handling
+- Query keys for React Query caching
+- Domain-specific API modules: auth, companies, agents, issues, goals, projects, dashboard, runs, VM
+
+### Performance & Styling
+
+- Tailwind CSS 4 with custom theme
+- shadcn/ui components for consistency
+- React Query v5 for caching & sync
+- Responsive design (375px-1920px)
+- Dark mode support
+- Load time target: < 3s
 
 ## Executor Application (apps/executor)
 
@@ -523,8 +629,8 @@ Each feature has corresponding test files:
 ---
 
 **Last Updated:** March 17, 2026
-**Total LOC:** ~8,200 (excluding node_modules)
-**Total Files:** ~380 TypeScript files
-**Phase 5 Status:** COMPLETE (Claude Adapter + Executor App)
-**Next Phase:** Phase 6 (Frontend Pages & UI)
+**Total LOC:** ~10,213 (excluding node_modules)
+**Total Files:** ~428 TypeScript files
+**Phase 6 Status:** COMPLETE (Frontend Pages & UI)
+**Next Phase:** Phase 7 (Real-time Events & WebSocket)
 **Reference:** See [project-overview-pdr.md](./project-overview-pdr.md) for product context

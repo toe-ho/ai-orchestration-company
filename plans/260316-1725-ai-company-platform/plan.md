@@ -24,7 +24,7 @@ Monorepo (`@aicompany/*`) with 3 apps + 3 packages. NestJS backend (CQRS + TypeO
 | 3 | Core CRUD — Companies, Agents, Issues | ~20h | complete | [phase-03](./phase-03-core-crud-companies-agents-issues.md) |
 | 4 | Heartbeat + Execution Engine + Provisioner | ~20h | complete | [phase-04](./phase-04-heartbeat-execution-engine-provisioner.md) |
 | 5 | Claude Adapter + Executor App | ~15h | complete | [phase-05](./phase-05-claude-adapter-executor.md) |
-| 6 | Frontend Pages | ~15h | pending | [phase-06](./phase-06-frontend-pages.md) |
+| 6 | Frontend Pages | ~15h | complete | [phase-06](./phase-06-frontend-pages.md) |
 | 7 | Real-time Events | ~8h | pending | [phase-07](./phase-07-realtime-events.md) |
 | 8 | Cost Tracking + Approvals + Governance | ~12h | pending | [phase-08](./phase-08-cost-tracking-approvals-governance.md) |
 | 9 | Templates + Onboarding | ~8h | pending | [phase-09](./phase-09-templates-onboarding.md) |

@@ -9,8 +9,8 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P2
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** approved
 - **Description:** Build all frontend pages using React 19 + React Router + React Query + Tailwind 4 + shadcn/ui. API client layer, layout components, auth pages, dashboard, agents, issues, org chart, settings.
 
 ## Key Insights
@@ -212,24 +212,24 @@ src/
     - ConfirmDialog: shadcn/ui AlertDialog for destructive actions
 
 ## Todo List
-- [ ] API client (base fetch + all domain modules)
-- [ ] Query keys factory
-- [ ] AuthProvider + useAuth hook
-- [ ] CompanyProvider + useCompany hook
-- [ ] ThemeProvider + useTheme hook
-- [ ] Router setup (public + protected routes)
-- [ ] AppShell layout (Sidebar, TopBar, Breadcrumbs)
-- [ ] Auth pages (Sign In, Sign Up)
-- [ ] Dashboard page
-- [ ] Agents list page + AgentCard
-- [ ] Agent detail page (tabs)
-- [ ] Issues list page + KanbanBoard
-- [ ] Issue detail page
-- [ ] Run detail page + event stream
-- [ ] Settings pages (company, API keys, members)
-- [ ] Shared components (StatusBadge, EmptyState, ConfirmDialog)
-- [ ] Dark mode toggle
-- [ ] Responsive sidebar collapse
+- [x] API client (base fetch + all domain modules)
+- [x] Query keys factory
+- [x] AuthProvider + useAuth hook
+- [x] CompanyProvider + useCompany hook
+- [x] ThemeProvider + useTheme hook
+- [x] Router setup (public + protected routes)
+- [x] AppShell layout (Sidebar, TopBar, Breadcrumbs)
+- [x] Auth pages (Sign In, Sign Up)
+- [x] Dashboard page
+- [x] Agents list page + AgentCard
+- [x] Agent detail page (tabs)
+- [x] Issues list page + KanbanBoard
+- [x] Issue detail page
+- [x] Run detail page + event stream
+- [x] Settings pages (company, API keys, members)
+- [x] Shared components (StatusBadge, EmptyState, ConfirmDialog)
+- [x] Dark mode toggle
+- [x] Responsive sidebar collapse
 
 ## Success Criteria
 - All pages render with correct data from API
