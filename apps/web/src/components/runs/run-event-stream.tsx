@@ -9,10 +9,10 @@ interface RunEventStreamProps {
 }
 
 export function RunEventStream({ companyId, runId }: RunEventStreamProps): React.ReactElement {
+  // No refetchInterval — live updates are pushed via WebSocket (useLiveEvents in AppShell)
   const { data: events = [], isLoading, isError } = useQuery({
     queryKey: queryKeys.runs.events(companyId, runId),
     queryFn: () => heartbeatRunsApi.listEvents(companyId, runId),
-    refetchInterval: 5_000,
   });
 
   if (isLoading) {

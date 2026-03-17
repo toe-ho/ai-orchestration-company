@@ -2,6 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
 import type { IIssueRepository } from '../../../domain/repositories/i-issue-repository.js';
 import { ISSUE_REPOSITORY } from '../../../domain/repositories/i-issue-repository.js';
+import type { ICompanyEventPublisher } from '../../../application/services/interface/i-company-event-publisher.js';
+import { COMPANY_EVENT_PUBLISHER } from '../../../application/services/interface/i-company-event-publisher.js';
 import type { IIssue } from '@aicompany/shared';
 
 export class UpdateIssueCommand {
@@ -16,12 +18,18 @@ export class UpdateIssueCommand {
 export class UpdateIssueHandler implements ICommandHandler<UpdateIssueCommand, IIssue> {
   constructor(
     @Inject(ISSUE_REPOSITORY) private readonly issueRepo: IIssueRepository,
+    @Inject(COMPANY_EVENT_PUBLISHER) private readonly publisher: ICompanyEventPublisher,
   ) {}
 
   async execute(cmd: UpdateIssueCommand): Promise<IIssue> {
     const existing = await this.issueRepo.findByIdAndCompany(cmd.id, cmd.companyId);
     if (!existing) throw new NotFoundException(`Issue ${cmd.id} not found`);
     const updated = await this.issueRepo.update(cmd.id, cmd.partial);
+    await this.publisher.publishCompanyEvent(cmd.companyId, {
+      type: 'issue.updated',
+      data: { issueId: cmd.id, changes: cmd.partial as Record<string, unknown> },
+      timestamp: new Date().toISOString(),
+    });
     return updated!;
   }
 }

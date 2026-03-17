@@ -9,8 +9,8 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P2
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** passed
 - **Description:** Wire Redis pub/sub (Upstash) for backend event distribution, NestJS WebSocket gateway for client connections, frontend WebSocket hook that invalidates React Query caches on events.
 
 ## Key Insights

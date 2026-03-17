@@ -335,37 +335,45 @@ CompanyRepository (Implementation)
 └─ Manages transactions
 ```
 
-## Real-Time Communication (Phase 7 - Planned)
+## Real-Time Communication (Phase 7 - COMPLETE)
+
+**Implementation:** WebSocket Gateway + Redis Pub/Sub + React Query
 
 ```
-Control Plane          Redis                Execution Plane
-
-Agent issues task
-  │ 1. Publish
-  ├────────────────────> PUBLISH
-                        channel:
-                        'exec/c1/a1'
-                                          2. Subscribe
-                                          <──────────────
-                                          Listen for events
-
-                                          Execute task
-                                          Agent streams
-                                          output tokens
-
-                        3. Publish
-                        <──────────────────────
-                        PUBLISH event
-
-Listen for updates
-  │ 4. Event received
-  ├────────────────────<──────────────────────
-  │                       {type: 'token', ...}
-  │
-  └─ WebSocket push to frontend
-     /api/companies/:cid/ws
-     {type: 'agent-update', agentId, event}
+Frontend (React)       WebSocket        Control Plane (NestJS)      Redis
+                       Connection           + Redis Sub
+│                           │                    │                    │
+├─ Connect                  │                    │                    │
+│  with session JWT    ────>│                    │                    │
+│                            │                    │                    │
+│                        Authenticate            │                    │
+│                        Verify company          │                    │
+│                            │                   │                    │
+│                           [Connected]           │                    │
+│                            │                    │                    │
+│                                              Event emission
+│                                              (PauseAgent, etc.)
+│                                                 │                    │
+│                                                 ├──────────────────>│
+│                                                 │  PUBLISH           │
+│                                                 │  channel:          │
+│                                                 │  company:{cid}     │
+│                                                 │                    │
+│                         Redis Sub <────────────────────────────────<┤
+│                         Receives event                              │
+│                         {type: 'agent-paused', agentId, ...}       │
+│                            │                                        │
+│  Real-time update     <────┤                                        │
+│  {event: ...}              │                                        │
+└────────────────────────────┘
 ```
+
+**Components:**
+- **LiveEventsGateway** (@nestjs/websockets + socket.io): Authenticates connections, manages subscriptions
+- **RedisCompanyEventPublisher:** Publishes company-level events to Redis channel `company:{companyId}`
+- **Frontend Hooks:** `use-websocket()`, `use-live-events()` for subscribing to real-time events
+- **Event Sources:** PauseAgentHandler, ResumeAgentHandler, CheckoutIssueHandler, UpdateIssueHandler, OnHeartbeatCompletedHandler
+- **Auth:** Better Auth session cookie validation on WebSocket handshake
 
 ## Adapter Pattern (AI Model Integration)
 

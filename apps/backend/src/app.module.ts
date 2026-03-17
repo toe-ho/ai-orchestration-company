@@ -14,6 +14,7 @@ import { SharedModule } from './module/shared-module.js';
 import { ApiModule } from './module/api-module.js';
 import { ExecutionModule } from './module/execution-module.js';
 import { SchedulerModule } from './module/scheduler-module.js';
+import { RealtimeModule } from './module/realtime-module.js';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SchedulerModule } from './module/scheduler-module.js';
     ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
+    RealtimeModule,
     SharedModule,
     ExecutionModule,
     SchedulerModule,
