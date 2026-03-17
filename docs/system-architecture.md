@@ -335,6 +335,106 @@ CompanyRepository (Implementation)
 └─ Manages transactions
 ```
 
+## Cost Tracking & Budget Management (Phase 8 - COMPLETE)
+
+**Implementation:** Cost Event Recording + Nightly Reconciliation + API Key Vault
+
+```
+Execution Run
+  │
+  └─ OnHeartbeatCompletedHandler
+     │
+     └─ RecordCostEventCommand
+        ├─ Calculate: tokens × rate = cents
+        ├─ Provider, model, tokens, cost captured
+        │
+        └─ CostEventRepository.save()
+           │
+           └─ INSERT INTO cost_events
+              {companyId, agentId, provider, model, tokens, cents, timestamp}
+
+Daily (02:00) - PostgreSQL Advisory Lock
+  │
+  └─ NightlyCostReconciliationService
+     ├─ Acquire advisory lock (pg_advisory_lock)
+     ├─ Sum daily costs by company
+     ├─ Check budget thresholds (80%, 95%)
+     ├─ Emit alerts if approaching limit
+     │
+     └─ Update company budget status
+```
+
+**Key Features:**
+- **Cost Tracking:** Provider, model, token count, cost in cents per run
+- **Budget Reconciliation:** Nightly cron at 02:00 UTC with advisory lock
+- **Alerts:** Threshold notifications at 80% & 95% budget utilization
+- **API Key Vault:** AES-256-GCM encryption for agent API keys (pcp_ prefix, SHA-256 hash)
+- **Reports:** Cost summaries by company, agent, model, time period
+
+**Controllers:**
+- **BoardCostController:** GET /board/cost (summary), GET /board/cost/export (reports)
+- **BoardApiKeyVaultController:** POST/PUT/DELETE encrypted API keys
+- **AgentApprovalController:** Agent-specific cost & approval queries
+
+---
+
+## Approval Workflow & Governance (Phase 8 - COMPLETE)
+
+**Implementation:** Create → Approve/Reject/Request-Revision → ApprovalResolved → Auto-Create Agent
+
+```
+Board Member
+  │ 1. Submit approval request
+  ├──────────────────────────────>  POST /board/approval
+                                        {actor, agentType, ...}
+                                        │
+                                        └─ CreateApprovalCommand
+                                           ├─ Validate inputs
+                                           ├─ Create Approval record
+                                           │  status: pending
+                                           │
+                                           └─ ApprovalRepository.save()
+                                              INSERT INTO approvals
+
+Board Manager
+  │ 2. Review & approve
+  ├──────────────────────────────>  POST /board/approval/:id/resolve
+                                        {decision: 'approved', comment}
+                                        │
+                                        └─ ResolveApprovalCommand
+                                           ├─ Update approval.status
+                                           ├─ Add ApprovalComment
+                                           ├─ Emit ApprovalResolvedEvent
+                                           │
+                                           └─ ApprovalRepository.update()
+
+Event Handler (OnApprovalResolvedHandler)
+  │ 3. Auto-create agent if hired
+  ├─ IF decision === 'approved' AND type === 'hire_agent'
+  │
+  └─ CreateAgentCommand (auto-triggered)
+     ├─ Generate agent credentials
+     ├─ Create pcp_ API key
+     ├─ Show key once (stored hashed)
+     │
+     └─ AgentRepository.save()
+```
+
+**Approval Status:**
+- `pending` - Awaiting review
+- `approved` - Request accepted
+- `rejected` - Request denied
+- `revision-requested` - Changes needed, resubmit
+
+**Key Features:**
+- **Approval Comments:** Threaded discussion on each approval
+- **Audit Trail:** Who approved/rejected, when, with comments
+- **Auto-Creation:** Approved hire_agent requests auto-create agents
+- **API Key Management:** pcp_ prefix, SHA-256 hashed, shown once, encrypted at rest (AES-256-GCM)
+- **Multi-role Support:** Different roles can create/approve (configurable)
+
+---
+
 ## Real-Time Communication (Phase 7 - COMPLETE)
 
 **Implementation:** WebSocket Gateway + Redis Pub/Sub + React Query
@@ -437,18 +537,45 @@ ClaudeAdapter (Implementation)
          │ id (PK)         │
          │ name            │
          │ status          │
+         │ budget_limit$   │ (Phase 8 NEW)
          │ createdAt       │
          └─────────────────┘
                  │
-    ┌────────────┼────────────┐
-    │            │            │
-┌───▼───┐  ┌────▼────┐  ┌───▼──────┐
-│agents │  │ projects │  │  issues  │
-├───────┤  ├─────────┤  ├──────────┤
-│cid(FK)│  │cid(FK)  │  │cid (FK)  │
-│status │  │status   │  │status    │
-│type   │  │name     │  │assignee  │
-└───────┘  └─────────┘  └──────────┘
+    ┌────────────┼────────────────────┐
+    │            │                    │
+┌───▼───┐  ┌────▼────┐  ┌───▼──────┐ ┌──▼──────────┐
+│agents │  │ projects │  │  issues  │ │ cost_events │ (Phase 8)
+├───────┤  ├─────────┤  ├──────────┤ ├─────────────┤
+│cid(FK)│  │cid(FK)  │  │cid (FK)  │ │cid (FK)     │
+│status │  │status   │  │status    │ │agentId (FK) │
+│type   │  │name     │  │assignee  │ │provider     │
+└───────┘  └─────────┘  └──────────┘ │model        │
+    │          │             │        │tokens       │
+    │          │             │        │cents        │
+    │          │             │        │timestamp    │
+    │          │             │        └─────────────┘
+    │          │             │
+    │          │             │        ┌──────────────────┐
+    │          │             │        │ approvals        │ (Phase 8)
+    │          │             │        ├──────────────────┤
+    │          │             │        │id (PK)           │
+    │          │             │        │cid (FK)          │
+    │          │             │        │actor_id (FK)     │
+    │          │             │        │type (hire_agent) │
+    │          │             │        │status (pending)  │
+    │          │             │        │metadata (JSON)   │
+    │          │             │        │createdAt         │
+    │          │             │        └──────────────────┘
+    │          │             │                 │ 1:N
+    │          │             │        ┌────────▼──────────┐
+    │          │             │        │approval_comments  │
+    │          │             │        ├───────────────────┤
+    │          │             │        │id (PK)            │
+    │          │             │        │approvalId (FK)    │
+    │          │             │        │userId (FK)        │
+    │          │             │        │message            │
+    │          │             │        │createdAt          │
+    │          │             │        └───────────────────┘
     │          │             │
     └──────────┼─────────────┘
                │
@@ -594,6 +721,7 @@ Environment Variables (Secure in Production)
 
 ---
 
-**Last Updated:** March 2026
-**Version:** 1.0
+**Last Updated:** March 17, 2026
+**Version:** 1.1 (Phase 8 adds cost tracking & approvals)
+**Phase 8 Additions:** Cost tracking, budget management, approval workflows, API key vault (AES-256-GCM)
 **Reference:** See [blueprint/](./blueprint/) for detailed technical designs

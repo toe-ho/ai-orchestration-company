@@ -21,6 +21,11 @@ import { CompanyApiKeyModel } from '../infrastructure/persistence/models/company
 import { AgentRuntimeStateModel } from '../infrastructure/persistence/models/agent-runtime-state-model.js';
 import { AgentTaskSessionModel } from '../infrastructure/persistence/models/agent-task-session-model.js';
 import { AgentWakeupRequestModel } from '../infrastructure/persistence/models/agent-wakeup-request-model.js';
+// Phase 8 models
+import { CostEventModel } from '../infrastructure/persistence/models/cost-event-model.js';
+import { ApprovalModel } from '../infrastructure/persistence/models/approval-model.js';
+import { ApprovalCommentModel } from '../infrastructure/persistence/models/approval-comment-model.js';
+import { AgentApiKeyModel } from '../infrastructure/persistence/models/agent-api-key-model.js';
 
 // Repositories
 import { CompanyRepository } from '../infrastructure/repositories/company-repository.js';
@@ -36,6 +41,10 @@ import { HeartbeatRunEventRepository } from '../infrastructure/repositories/hear
 import { CompanyVmRepository } from '../infrastructure/repositories/company-vm-repository.js';
 import { AgentWakeupRepository } from '../infrastructure/repositories/agent-wakeup-repository.js';
 import { AgentRuntimeStateRepository } from '../infrastructure/repositories/agent-runtime-state-repository.js';
+// Phase 8 repositories
+import { CostEventRepository } from '../infrastructure/repositories/cost-event-repository.js';
+import { ApprovalRepository } from '../infrastructure/repositories/approval-repository.js';
+import { AgentApiKeyRepository } from '../infrastructure/repositories/agent-api-key-repository.js';
 
 // Injection tokens
 import { COMPANY_REPOSITORY } from '../domain/repositories/i-company-repository.js';
@@ -51,6 +60,14 @@ import { HEARTBEAT_RUN_EVENT_REPOSITORY } from '../domain/repositories/i-heartbe
 import { COMPANY_VM_REPOSITORY } from '../domain/repositories/i-company-vm-repository.js';
 import { AGENT_WAKEUP_REPOSITORY } from '../domain/repositories/i-agent-wakeup-repository.js';
 import { AGENT_RUNTIME_STATE_REPOSITORY } from '../domain/repositories/i-agent-runtime-state-repository.js';
+// Phase 8 tokens
+import { COST_EVENT_REPOSITORY } from '../domain/repositories/i-cost-event-repository.js';
+import { APPROVAL_REPOSITORY } from '../domain/repositories/i-approval-repository.js';
+import { AGENT_API_KEY_REPOSITORY } from '../infrastructure/repositories/agent-api-key-repository.js';
+
+// Services
+import { ApiKeyVaultService } from '../application/services/impl/api-key-vault-service.js';
+import { API_KEY_VAULT_SERVICE } from '../application/services/interface/i-api-key-vault-service.js';
 
 // Command handlers
 import { CreateCompanyHandler } from '../application/commands/company/create-company-command.js';
@@ -71,6 +88,18 @@ import { UpdateGoalHandler } from '../application/commands/goal/update-goal-comm
 import { CreateProjectHandler } from '../application/commands/project/create-project-command.js';
 import { UpdateProjectHandler } from '../application/commands/project/update-project-command.js';
 import { LogActivityHandler } from '../application/commands/activity/log-activity-command.js';
+// Phase 8 command handlers
+import { RecordCostEventHandler } from '../application/commands/cost/record-cost-event-command.js';
+import { ReconcileBudgetsHandler } from '../application/commands/cost/reconcile-budgets-command.js';
+import { CreateApprovalHandler } from '../application/commands/approval/create-approval-command.js';
+import { ApproveHandler } from '../application/commands/approval/approve-command.js';
+import { RejectHandler } from '../application/commands/approval/reject-command.js';
+import { RequestRevisionHandler } from '../application/commands/approval/request-revision-command.js';
+import { StoreApiKeyHandler } from '../application/commands/api-key-vault/store-api-key-command.js';
+import { ValidateApiKeyHandler } from '../application/commands/api-key-vault/validate-api-key-command.js';
+import { RevokeApiKeyHandler } from '../application/commands/api-key-vault/revoke-api-key-command.js';
+import { CreateAgentApiKeyHandler } from '../application/commands/agent/create-agent-api-key-command.js';
+import { RevokeAgentApiKeyHandler } from '../application/commands/agent/revoke-agent-api-key-command.js';
 
 // Query handlers
 import { GetCompanyHandler } from '../application/queries/company/get-company-query.js';
@@ -87,6 +116,13 @@ import { ListProjectsHandler } from '../application/queries/project/list-project
 import { GetProjectHandler } from '../application/queries/project/get-project-query.js';
 import { ListActivityHandler } from '../application/queries/activity/list-activity-query.js';
 import { GetDashboardSummaryHandler } from '../application/queries/dashboard/get-dashboard-summary-query.js';
+// Phase 8 query handlers
+import { GetCostSummaryHandler } from '../application/queries/cost/get-cost-summary-query.js';
+import { ListApprovalsHandler } from '../application/queries/approval/list-approvals-query.js';
+import { GetApprovalHandler } from '../application/queries/approval/get-approval-query.js';
+
+// Phase 8 event handlers
+import { OnApprovalResolvedHandler } from '../application/events/handlers/on-approval-resolved-handler.js';
 
 const MODELS = [
   CompanyModel, AgentModel, IssueModel, GoalModel, ProjectModel,
@@ -94,6 +130,8 @@ const MODELS = [
   // Phase 4
   HeartbeatRunModel, HeartbeatRunEventModel, CompanyVmModel, CompanyApiKeyModel,
   AgentRuntimeStateModel, AgentTaskSessionModel, AgentWakeupRequestModel,
+  // Phase 8
+  CostEventModel, ApprovalModel, ApprovalCommentModel, AgentApiKeyModel,
 ];
 
 const REPOSITORY_PROVIDERS = [
@@ -111,6 +149,10 @@ const REPOSITORY_PROVIDERS = [
   { provide: COMPANY_VM_REPOSITORY, useClass: CompanyVmRepository },
   { provide: AGENT_WAKEUP_REPOSITORY, useClass: AgentWakeupRepository },
   { provide: AGENT_RUNTIME_STATE_REPOSITORY, useClass: AgentRuntimeStateRepository },
+  // Phase 8
+  { provide: COST_EVENT_REPOSITORY, useClass: CostEventRepository },
+  { provide: APPROVAL_REPOSITORY, useClass: ApprovalRepository },
+  { provide: AGENT_API_KEY_REPOSITORY, useClass: AgentApiKeyRepository },
 ];
 
 const COMMAND_HANDLERS = [
@@ -120,6 +162,11 @@ const COMMAND_HANDLERS = [
   CreateGoalHandler, UpdateGoalHandler,
   CreateProjectHandler, UpdateProjectHandler,
   LogActivityHandler,
+  // Phase 8
+  RecordCostEventHandler, ReconcileBudgetsHandler,
+  CreateApprovalHandler, ApproveHandler, RejectHandler, RequestRevisionHandler,
+  StoreApiKeyHandler, ValidateApiKeyHandler, RevokeApiKeyHandler,
+  CreateAgentApiKeyHandler, RevokeAgentApiKeyHandler,
 ];
 
 const QUERY_HANDLERS = [
@@ -130,12 +177,36 @@ const QUERY_HANDLERS = [
   ListProjectsHandler, GetProjectHandler,
   ListActivityHandler,
   GetDashboardSummaryHandler,
+  // Phase 8
+  GetCostSummaryHandler, ListApprovalsHandler, GetApprovalHandler,
+];
+
+const EVENT_HANDLERS = [
+  // Phase 8
+  OnApprovalResolvedHandler,
+];
+
+const SERVICE_PROVIDERS = [
+  { provide: API_KEY_VAULT_SERVICE, useClass: ApiKeyVaultService },
 ];
 
 @Global()
 @Module({
   imports: [TypeOrmModule.forFeature(MODELS), CqrsModule],
-  providers: [...REPOSITORY_PROVIDERS, ...COMMAND_HANDLERS, ...QUERY_HANDLERS],
-  exports: [...REPOSITORY_PROVIDERS, ...COMMAND_HANDLERS, ...QUERY_HANDLERS, TypeOrmModule],
+  providers: [
+    ...REPOSITORY_PROVIDERS,
+    ...COMMAND_HANDLERS,
+    ...QUERY_HANDLERS,
+    ...EVENT_HANDLERS,
+    ...SERVICE_PROVIDERS,
+  ],
+  exports: [
+    ...REPOSITORY_PROVIDERS,
+    ...COMMAND_HANDLERS,
+    ...QUERY_HANDLERS,
+    ...EVENT_HANDLERS,
+    ...SERVICE_PROVIDERS,
+    TypeOrmModule,
+  ],
 })
 export class SharedModule {}

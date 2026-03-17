@@ -16,6 +16,8 @@ import { RunDetailPage } from './pages/runs/run-detail-page.js';
 import { CompanySettingsPage } from './pages/settings/company-settings-page.js';
 import { ApiKeysPage } from './pages/settings/api-keys-page.js';
 import { MembersPage } from './pages/settings/members-page.js';
+import { CostDashboardPage } from './pages/costs/cost-dashboard-page.js';
+import { ApprovalsPage } from './pages/approvals/approvals-page.js';
 
 class RouteErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -59,6 +61,8 @@ export function App(): React.ReactElement {
                   <Route path="/issues" element={<IssuesListPage />} />
                   <Route path="/issues/:id" element={<IssueDetailPage />} />
                   <Route path="/runs/:rid" element={<RunDetailPage />} />
+                  <Route path="/costs" element={<CostDashboardPage />} />
+                  <Route path="/approvals" element={<ApprovalsPage />} />
                   <Route path="/settings" element={<CompanySettingsPage />} />
                   <Route path="/settings/api-keys" element={<ApiKeysPage />} />
                   <Route path="/settings/members" element={<MembersPage />} />

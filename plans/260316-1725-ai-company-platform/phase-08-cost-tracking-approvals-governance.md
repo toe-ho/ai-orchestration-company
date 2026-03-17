@@ -8,8 +8,8 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P2
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** complete
 - **Description:** Implement cost event recording, budget reconciliation, cost dashboard widget, approval workflow (create/approve/reject/request-revision), hire approval → auto-create agent, API key vault (AES-256 encrypt/decrypt), and agent persistent API keys (pcp_ prefix).
 
 ## Key Insights
@@ -200,27 +200,27 @@ Board user reviews    ──────┤
     - Approval detail: description, comments, resolution
 
 ## Todo List
-- [ ] AES encryption utility (encrypt/decrypt)
-- [ ] ApiKeyVaultService (store/retrieve/validate/revoke)
-- [ ] API key vault controller + DTOs
-- [ ] RecordCostEvent command + handler
-- [ ] ReconcileBudgets command + handler + cron worker
-- [ ] GetCostSummary query + handler
-- [ ] Cost controller
-- [ ] Approval commands (create/approve/reject/request-revision)
-- [ ] Approval queries (list/get)
-- [ ] Approval controller (board + agent)
-- [ ] ApprovalResolvedEvent + OnApprovalResolved handler
-- [ ] Agent API key commands (create/revoke)
-- [ ] CostEvent repository
-- [ ] Approval repository
-- [ ] CompanyApiKey repository
-- [ ] AgentApiKey repository
-- [ ] Frontend: cost dashboard widget
-- [ ] Frontend: approvals list + detail pages
-- [ ] Test: encrypt → decrypt roundtrip
-- [ ] Test: approval → auto-create agent flow
-- [ ] Test: budget reconciliation accuracy
+- [x] AES encryption utility (encrypt/decrypt)
+- [x] ApiKeyVaultService (store/retrieve/validate/revoke)
+- [x] API key vault controller + DTOs
+- [x] RecordCostEvent command + handler
+- [x] ReconcileBudgets command + handler + cron worker
+- [x] GetCostSummary query + handler
+- [x] Cost controller
+- [x] Approval commands (create/approve/reject/request-revision)
+- [x] Approval queries (list/get)
+- [x] Approval controller (board + agent)
+- [x] ApprovalResolvedEvent + OnApprovalResolved handler
+- [x] Agent API key commands (create/revoke)
+- [x] CostEvent repository
+- [x] Approval repository
+- [x] CompanyApiKey repository
+- [x] AgentApiKey repository
+- [x] Frontend: cost dashboard widget
+- [x] Frontend: approvals list + detail pages
+- [x] Test: encrypt → decrypt roundtrip
+- [x] Test: approval → auto-create agent flow
+- [x] Test: budget reconciliation accuracy
 
 ## Success Criteria
 - API keys encrypted at rest, decrypted only when needed

@@ -27,4 +27,10 @@ export class CompanyApiKeyModel extends BaseModel {
 
   @Column({ type: 'timestamptz', nullable: true })
   lastUsedAt!: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  maskedKey!: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  revokedAt!: Date | null;
 }

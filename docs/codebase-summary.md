@@ -4,20 +4,20 @@
 
 AI Company Platform is a monorepo built with **pnpm workspaces** and **Turborepo**. It comprises three applications (backend, web, executor) and three shared packages (shared types, adapters, adapter utilities).
 
-**Total:** ~428 TypeScript files across all apps/packages, ~10,213 LOC (excluding node_modules and migrations). Phase 6 adds ~2,013 LOC across web frontend.
+**Total:** ~477 TypeScript files across all apps/packages, ~12,658 LOC (excluding node_modules and migrations). Phase 8 adds cost tracking & approval workflows with API key vault encryption.
 
 ## Directory Structure & LOC Breakdown
 
 ```
 ai-orchestration-company/
-├── apps/                          (~178 files, ~8,513 LOC)
-│   ├── backend/                   (~120 files, ~3,969 LOC)
-│   ├── web/                       (~48 files, ~2,013 LOC) — Phase 6 Complete
-│   └── executor/                  (~7 files, ~2,381 LOC) — Phase 5 Complete
-├── packages/                      (~70 files, ~2,100 LOC)
-│   ├── shared/                    (~51 files, ~1,400 LOC)
-│   ├── adapters/                  (~7 files, ~350 LOC) — Phase 5 Complete
-│   └── adapter-utils/             (~6 files, ~400 LOC) — Phase 5 Complete
+├── apps/                          (~220 files, ~10,800 LOC)
+│   ├── backend/                   (~150 files, ~5,200 LOC) — Phase 8 adds cost/approval modules
+│   ├── web/                       (~60 files, ~3,200 LOC) — Phase 8 adds CostDashboard, ApprovalsPage
+│   └── executor/                  (~10 files, ~2,400 LOC) — Phase 5 Complete
+├── packages/                      (~80 files, ~2,300 LOC)
+│   ├── shared/                    (~55 files, ~1,500 LOC) — Phase 8 adds ApprovalStatus enum
+│   ├── adapters/                  (~8 files, ~400 LOC) — Phase 5 Complete
+│   └── adapter-utils/             (~7 files, ~400 LOC) — Phase 5 Complete
 ├── config/
 │   ├── skills/                    (empty, waiting for templates)
 │   └── templates/                 (empty, waiting for templates)
@@ -121,17 +121,17 @@ apps/backend/src/
 
 | Metric | Count |
 |--------|-------|
-| Controllers | 12 |
-| Command Handlers | 22 |
-| Query Handlers | 16 |
-| Repository Implementations | 14 |
-| Domain Interfaces | 10 |
-| TypeORM Models | 17 |
+| Controllers | 15 (+ board-approval, board-cost, board-api-key-vault, agent-approval) |
+| Command Handlers | 25 (+ create-approval, record-cost-event, resolve-approval) |
+| Query Handlers | 18 (+ get-approval, list-approvals, get-cost-summary) |
+| Repository Implementations | 16 (+ cost-event, approval) |
+| Domain Interfaces | 12 (+ cost & approval interfaces) |
+| TypeORM Models | 20 (+ cost-event, approval, approval-comment) |
 | Guards | 4 |
 | Config Loaders | 6 |
 | Decorators | 5 |
 | Interceptors | 3 |
-| Services (Phase 4) | 4 |
+| Services (Phase 4+) | 6 (+ cost-calculator, budget-reconciliation) |
 
 ### Core Entities
 
@@ -144,7 +144,7 @@ apps/backend/src/
 - **Activity:** Audit log entry (immutable)
 - **IssueComment:** Comments on issues
 - **UserCompany:** User-to-company relationship with roles
-- **AgentApiKey:** Agent authentication token
+- **AgentApiKey:** Agent authentication token (pcp_ prefix, SHA-256 hash)
 - **CompanyApiKey:** Company authentication token
 - **Heartbeat:** Agent health check record
 - **CompanyVM:** Fly.io VM metadata (Phase 4)
@@ -152,6 +152,9 @@ apps/backend/src/
 - **HeartbeatRunEvent:** Execution event log (Phase 4)
 - **CompanyTemplate:** Pre-built company configuration
 - **Session:** Better Auth session
+- **CostEvent:** Cost tracking per heartbeat run (Phase 8 NEW)
+- **Approval:** Approval workflow records (Phase 8 NEW)
+- **ApprovalComment:** Comments on approvals (Phase 8 NEW)
 
 ### CQRS Pattern
 
@@ -504,7 +507,58 @@ executor (Fastify)
 - POST /companies/:cid/vm/hibernate (suspend VM)
 - POST /companies/:cid/vm/destroy (terminate VM)
 
-## Phase 7: Real-time Events & WebSocket (NEW)
+## Phase 8: Cost Tracking + Approvals + Governance (NEW)
+
+**Status:** COMPLETE (Implementation added March 17, 2026)
+
+### Components
+
+**1. Cost Tracking Module**
+- CostEventModel: Records provider, model, token counts, cost in cents per heartbeat run
+- CostEventRepository: Persistence layer with cost aggregation queries
+- RecordCostEventCommand: Handler to record execution costs
+- GetCostSummaryQuery: Retrieve cost summaries by company/agent/period
+- NightlyCostReconciliationService: Cron job (02:00 daily) with PostgreSQL advisory lock
+
+**2. Approval Workflow Module**
+- ApprovalModel: Approval records with status (pending, approved, rejected, revision-requested)
+- ApprovalCommentModel: Comment threads on approvals
+- ApprovalRepository: Data layer with approval filtering
+- CreateApprovalCommand: Initialize approval workflow
+- ResolveApprovalCommand: Approve, reject, or request revision
+- ApprovalResolvedEvent: Domain event emitted on status change
+- OnApprovalResolvedHandler: Auto-creates agent when hire_agent + approved
+
+**3. API Key Vault (AES-256-GCM)**
+- Agent API keys: pcp_ prefix, SHA-256 hashed, shown once on creation
+- AES-256-GCM encryption at rest in database
+- Revocation via BoardApiKeyVaultController
+- Secure storage & access validation
+
+**4. New Controllers (4 total)**
+- BoardApprovalController: Create, list, resolve approvals
+- BoardCostController: Fetch cost summary, export reports
+- BoardApiKeyVaultController: Store, validate, revoke encrypted API keys
+- AgentApprovalController: Agent-specific approval queries
+
+**5. Frontend Components (Phase 8 NEW)**
+- CostDashboardPage: Cost metrics, charts, trend analysis
+- ApprovalsPage: Approval queue with approve/reject actions
+- Cost API module: costs-api.ts for cost queries
+- Approvals API module: approvals-api.ts for approval management
+
+**6. Database Migration**
+- 1710000000004-CostTrackingAndApprovals.ts: Creates cost_events, approvals, approval_comments tables
+
+### Key Metrics
+
+- Backend: 4 new controllers, 3 commands, 3 queries, 2 models
+- Frontend: 2 pages, 2 API modules, approval workflow UI
+- Cost tracking: Per-run granularity, provider/model/tokens captured
+- Budget reconciliation: Nightly cron with advisory lock
+- Encryption: AES-256-GCM for API key vault
+
+## Phase 7: Real-time Events & WebSocket
 
 **Status:** COMPLETE (Implementation added March 17, 2026)
 
@@ -674,8 +728,8 @@ Each feature has corresponding test files:
 ---
 
 **Last Updated:** March 17, 2026
-**Total LOC:** ~10,500+ (excluding node_modules)
-**Total Files:** ~440+ TypeScript files
-**Phase 7 Status:** COMPLETE (Real-time Events & WebSocket)
-**Next Phase:** Phase 8 (Cost Tracking + Approvals)
+**Total LOC:** ~12,658 (excluding node_modules and migrations)
+**Total Files:** ~477 TypeScript files
+**Phase 8 Status:** COMPLETE (Cost Tracking + Approvals + Governance)
+**Next Phase:** Phase 9 (Templates + Onboarding)
 **Reference:** See [project-overview-pdr.md](./project-overview-pdr.md) for product context

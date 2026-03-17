@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Bot, CircleDot, Settings } from 'lucide-react';
+import { LayoutDashboard, Bot, CircleDot, DollarSign, CheckSquare, Settings } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
 import { useCompany } from '../../hooks/use-company.js';
 
@@ -8,6 +8,8 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/agents', label: 'Agents', Icon: Bot },
   { to: '/issues', label: 'Issues', Icon: CircleDot },
+  { to: '/costs', label: 'Costs', Icon: DollarSign },
+  { to: '/approvals', label: 'Approvals', Icon: CheckSquare },
   { to: '/settings', label: 'Settings', Icon: Settings },
 ];
 

@@ -33,4 +33,12 @@ export const queryKeys = {
     list: (cid: string) => ['companies', cid, 'projects'] as const,
     detail: (cid: string, id: string) => ['companies', cid, 'projects', id] as const,
   },
+  costs: {
+    summary: (cid: string, from?: string, to?: string) =>
+      ['companies', cid, 'costs', 'summary', { from, to }] as const,
+  },
+  approvals: {
+    list: (cid: string, status?: string) => ['companies', cid, 'approvals', { status }] as const,
+    detail: (cid: string, id: string) => ['companies', cid, 'approvals', id] as const,
+  },
 };

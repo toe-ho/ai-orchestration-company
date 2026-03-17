@@ -6,12 +6,10 @@ import { FlyioClient } from '../infrastructure/external/flyio/flyio-client.js';
 // Services
 import { ExecutionEngineService } from '../application/services/impl/execution-engine-service.js';
 import { FlyioProvisionerService } from '../application/services/impl/flyio-provisioner-service.js';
-import { ApiKeyVaultService } from '../application/services/impl/api-key-vault-service.js';
 import { RedisLiveEventPublisher } from '../application/services/impl/redis-live-event-publisher.js';
 import { AgentJwtService } from '../application/services/impl/agent-jwt-service.js';
 import { EXECUTION_RUNNER } from '../application/services/interface/i-execution-runner.js';
 import { PROVISIONER_SERVICE } from '../application/services/interface/i-provisioner-service.js';
-import { API_KEY_VAULT_SERVICE } from '../application/services/interface/i-api-key-vault-service.js';
 import { LIVE_EVENT_PUBLISHER } from '../application/services/interface/i-live-event-publisher.js';
 
 // Command handlers
@@ -39,7 +37,6 @@ const SERVICE_PROVIDERS = [
   AgentJwtService,
   { provide: EXECUTION_RUNNER, useClass: ExecutionEngineService },
   { provide: PROVISIONER_SERVICE, useClass: FlyioProvisionerService },
-  { provide: API_KEY_VAULT_SERVICE, useClass: ApiKeyVaultService },
   { provide: LIVE_EVENT_PUBLISHER, useClass: RedisLiveEventPublisher },
 ];
 

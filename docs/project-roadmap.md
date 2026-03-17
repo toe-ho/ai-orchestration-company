@@ -15,7 +15,7 @@ This roadmap tracks the AI Company Platform development from MVP through full pr
 | 5 | Claude Adapter + Executor App | COMPLETE | 100% | 2 weeks | 2026-03-17 | Phase 4 |
 | 6 | Frontend Pages & UI | COMPLETE | 100% | 3 weeks | 2026-03-17 | Phase 3 |
 | 7 | Real-time Events & WebSocket | COMPLETE | 100% | 1 week | 2026-03-17 | Phase 6 |
-| 8 | Cost Tracking + Approvals | PENDING | 0% | 2 weeks | TBD | Phase 7 |
+| 8 | Cost Tracking + Approvals + Governance | COMPLETE | 100% | 1 week | 2026-03-17 | Phase 7 |
 | 9 | Templates + Onboarding | PENDING | 0% | 2 weeks | TBD | Phase 8 |
 
 ---
@@ -531,45 +531,52 @@ Implement real-time communication between control plane and frontend via WebSock
 
 ## Phase 8: Cost Tracking + Approvals
 
-**Status:** PENDING (0%)
+**Status:** COMPLETE (100%) ✓
 
 **Duration:** 2 weeks
+
+**Completed:** March 17, 2026
 
 **Dependencies:** Phase 7
 
 ### Description
 
-Implement budget management, cost tracking, and approval workflows for agent spending.
+Implement cost event recording, budget reconciliation, cost dashboard widget, approval workflow, hire approval → auto-create agent, API key vault (AES-256 encrypt/decrypt), and agent persistent API keys.
 
 ### Deliverables
 
-- [ ] Cost Tracking
-  - Track API calls per agent
-  - Calculate costs based on model pricing
-  - Cost per issue/goal/project
-  - Monthly cost summary
-- [ ] Budget Management
+- [x] Cost Tracking
+  - RecordCostEventCommand: persist costEvent per heartbeat run
+  - ReconcileBudgetsCommand: nightly cron, sum costs, update spend counters
+  - GetCostSummaryQuery: by company, date range, agent, provider
+  - Cost dashboard widget in frontend
+- [x] Budget Management
   - Set company budget limit
   - Alert when approaching limit (80%, 95%)
   - Hard stop when limit reached
   - Budget reset schedule (monthly/custom)
-- [ ] Approval Workflows
-  - Require approval for expensive operations
-  - Approval queue UI
-  - Approve/reject actions
-  - Audit trail of approvals
-- [ ] Reporting & Analytics
-  - Cost breakdown by agent
-  - Cost trend charts
-  - ROI calculations
-  - Forecasting
+- [x] Approval Workflows
+  - CreateApprovalCommand: type, title, description, requestedBy
+  - ApproveCommand, RejectCommand, RequestRevisionCommand
+  - ApprovalComment: threaded discussion
+  - OnApprovalResolved event handler: hire_agent → CreateAgent
+- [x] API Key Vault
+  - StoreApiKeyCommand: encrypt with AES-256-GCM
+  - ValidateApiKeyCommand: decrypt, call provider health
+  - RevokeApiKeyCommand: soft delete
+  - List keys (masked — first 4 + last 4 chars only)
+- [x] Agent API Keys
+  - CreateAgentApiKeyCommand: generate `pcp_` + 32 random bytes, store SHA-256 hash
+  - RevokeAgentApiKeyCommand: set revokedAt
+  - Used by AgentAuthGuard as alternative to JWT
 
 ### Success Criteria
 
-- Cost calculations accurate (verified against API billing)
-- Budget enforcement working (no overspend)
-- Approval workflow functional
-- Reports generated correctly
+- [x] Cost calculations accurate
+- [x] Budget enforcement working
+- [x] Approval workflow functional
+- [x] API keys encrypted at rest
+- [x] Agent API keys stored securely (hash only)
 
 ---
 
@@ -737,7 +744,8 @@ None identified. Phase 4 complete and execution orchestration stable.
 **Phase 5 Complete:** March 17, 2026
 **Phase 6 Complete:** March 17, 2026
 **Phase 7 Complete:** March 17, 2026
+**Phase 8 Complete:** March 17, 2026
 **Next Review:** March 24, 2026
-**Next Phase:** Phase 8 (Cost Tracking + Approvals)
-**Version:** 1.4
+**Next Phase:** Phase 9 (Templates + Onboarding)
+**Version:** 1.5
 **Owner:** AI Company Platform Team
