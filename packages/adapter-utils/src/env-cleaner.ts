@@ -1,23 +1,15 @@
-/** List of environment variables that must NEVER be injected into agent processes */
-const BLOCKED_ENV_VARS = [
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
-  'DATABASE_URL',
-  'AUTH_SECRET',
-  'ENCRYPTION_KEY',
-  'FLY_API_TOKEN',
-  'REDIS_URL',
-];
+/** Only these env vars are forwarded to child agent processes */
+const ALLOWED_ENV_VARS = ['ANTHROPIC_API_KEY', 'NODE_ENV', 'HOME', 'PATH', 'TMPDIR'];
 
 /**
- * Strips dangerous or sensitive environment variables before passing
- * an env map to a child process or Fly.io VM.
+ * Allowlist-based env cleaner — returns only the vars explicitly permitted.
+ * Everything else is stripped, preventing secrets from leaking into agent processes.
  */
 export function cleanEnv(rawEnv: Record<string, string>): Record<string, string> {
   const cleaned: Record<string, string> = {};
-  for (const [key, value] of Object.entries(rawEnv)) {
-    if (!BLOCKED_ENV_VARS.includes(key)) {
-      cleaned[key] = value;
+  for (const key of ALLOWED_ENV_VARS) {
+    if (Object.prototype.hasOwnProperty.call(rawEnv, key) && rawEnv[key] !== undefined) {
+      cleaned[key] = rawEnv[key];
     }
   }
   return cleaned;

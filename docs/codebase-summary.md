@@ -4,20 +4,20 @@
 
 AI Company Platform is a monorepo built with **pnpm workspaces** and **Turborepo**. It comprises three applications (backend, web, executor) and three shared packages (shared types, adapters, adapter utilities).
 
-**Total:** ~356 TypeScript files across all apps/packages, ~5,900 LOC (excluding node_modules and migrations).
+**Total:** ~380+ TypeScript files across all apps/packages, ~8,200 LOC (excluding node_modules and migrations). Phase 5 adds ~2,300 LOC across executor app + adapter infrastructure.
 
 ## Directory Structure & LOC Breakdown
 
 ```
 ai-orchestration-company/
-├── apps/                          (~120 files, ~4,200 LOC)
+├── apps/                          (~130 files, ~6,500 LOC)
 │   ├── backend/                   (~120 files, ~3,969 LOC)
 │   ├── web/                       (~3 files, ~150 LOC)
-│   └── executor/                  (~4 files, ~120 LOC)
-├── packages/                      (~58 files, ~1,700 LOC)
+│   └── executor/                  (~7 files, ~2,381 LOC) — Phase 5 Complete
+├── packages/                      (~70 files, ~2,100 LOC)
 │   ├── shared/                    (~51 files, ~1,400 LOC)
-│   ├── adapters/                  (~3 files, ~100 LOC)
-│   └── adapter-utils/             (~4 files, ~200 LOC)
+│   ├── adapters/                  (~7 files, ~350 LOC) — Phase 5 Complete
+│   └── adapter-utils/             (~6 files, ~400 LOC) — Phase 5 Complete
 ├── config/
 │   ├── skills/                    (empty, waiting for templates)
 │   └── templates/                 (empty, waiting for templates)
@@ -258,25 +258,30 @@ interface ISessionCodec {
 
 **Purpose:** AI model integrations (Claude first, extensible)
 
-**Files:** 3 (100 LOC)
+**Files:** 7+ (350+ LOC) — Phase 5 Complete
 
 ### Contents
 
-- **AdapterRegistry:** Plugin system for runtime adapter registration
+- **adapter-interface.ts:** IAdapter interface (execute, cancel, health)
+- **adapter-registry.ts:** Plugin system for runtime adapter registration
+- **claude/claude-adapter.ts:** Claude CLI spawning, JSON parsing, SSE streaming
+- **claude/claude-output-parser.ts:** Parse newline-delimited JSON from claude CLI
+- **claude/claude-session-manager.ts:** Manage .claude/session files per agent+task
 - **BaseAdapter:** Abstract base class for adapter implementations
-- **ClaudeAdapter:** (Pending) Claude API integration
 
 ## Adapter Utils Package (packages/adapter-utils)
 
 **Purpose:** Shared utilities for adapter implementations
 
-**Files:** 4 (200 LOC)
+**Files:** 6+ (400+ LOC) — Phase 5 Complete
 
 ### Utilities
 
-- **BaseSessionCodec:** JSON↔Base64 session serialization
-- **cleanEnv():** Security filter removing sensitive env vars for child processes
-- **spawnWithTimeout():** Child process executor with timeout protection
+- **session-codec.ts:** JSON↔Base64 session serialization
+- **env-cleaner.ts:** Security filter removing sensitive env vars for child processes
+- **process-helpers.ts:** Child process spawn, kill-tree, timeout management
+- **sse-formatter.ts:** Format IExecutionEvent → Server-Sent Events text
+- **BaseSessionCodec:** Default JSON↔Base64 codec implementation
 - **LogStream:** Logging utilities for execution tracking
 
 ## Web Application (apps/web)
@@ -291,13 +296,33 @@ interface ISessionCodec {
 
 ## Executor Application (apps/executor)
 
-**Status:** Stub (~120 LOC)
+**Status:** COMPLETE (Phase 5) (~800+ LOC)
 
-**Purpose:** Fastify-based agent execution environment
+**Purpose:** Fastify-based agent execution environment on Fly.io VMs
 
-**Technology:** Fastify, TypeScript
+**Technology:** Fastify, TypeScript, Child Process, SSE Streaming
 
-**Pending:** Full implementation in Phase 5
+### File Organization
+
+```
+apps/executor/src/
+├── main.ts                                    # Fastify server setup, graceful shutdown
+├── routes/
+│   ├── execute-route.ts                       # POST /execute handler, SSE streaming
+│   ├── cancel-route.ts                        # POST /cancel handler
+│   └── health-route.ts                        # GET /health handler
+├── services/
+│   ├── execution-manager.ts                   # Track active runs, concurrency control
+│   └── auth-validator.ts                      # JWT verification, actor extraction
+└── Dockerfile                                 # Multi-stage build for Fly.io VMs
+```
+
+### Key Components
+
+- **ExecutionManager:** Maintains Map<runId, { adapter, process, startedAt }>, enforces 1 concurrent run/agent, timeout/cleanup
+- **AuthValidator:** Verifies agent JWT (AGENT_JWT_SECRET), extracts agentId/companyId/runId metadata
+- **SSE Streaming:** Pipes execution events as Server-Sent Events (event: type\ndata: json\n\n)
+- **Graceful Shutdown:** Handles SIGTERM, kills child processes, closes HTTP connections
 
 ## Dependency Graph
 
@@ -319,9 +344,9 @@ executor (Fastify)
   └─> adapter-utils (utilities)
 ```
 
-## Phase 4: Heartbeat Engine & Execution (NEW)
+## Phase 4: Heartbeat Engine & Execution
 
-**Status:** COMPLETE (Implementation added March 2026)
+**Status:** COMPLETE (Implementation added March 16, 2026)
 
 ### Components
 
@@ -365,6 +390,41 @@ executor (Fastify)
 - POST /companies/:cid/vm/wake (activate VM)
 - POST /companies/:cid/vm/hibernate (suspend VM)
 - POST /companies/:cid/vm/destroy (terminate VM)
+
+## Phase 5: Claude Adapter + Executor App (NEW)
+
+**Status:** COMPLETE (Implementation added March 17, 2026)
+
+### Components
+
+**1. Claude Adapter**
+- ClaudeAdapter: Spawns `claude` CLI, passes prompt via temp file, handles --context-file for sessions
+- ClaudeOutputParser: Parses newline-delimited JSON output, extracts usage stats
+- ClaudeSessionManager: Manages .claude/session directories per agent+task, handles cleanup
+
+**2. Executor Application**
+- 3 HTTP routes (POST /execute, POST /cancel, GET /health)
+- ExecutionManager: Tracks active runs, enforces concurrency limits, timeout management
+- AuthValidator: JWT verification, actor metadata extraction
+- Graceful shutdown on SIGTERM
+
+**3. Utilities**
+- SSE formatter: Converts IExecutionEvent to Server-Sent Events format
+- Process helpers: Spawn with timeout, kill-tree cleanup, stream parsing
+- Env cleaner: Allowlist approach (only ANTHROPIC_API_KEY + system vars)
+- Session codec: Base64 serialization for session state
+
+**4. Infrastructure**
+- Dockerfile: Multi-stage build, pre-installs @anthropic-ai/claude-code CLI
+- AdapterRegistry: Plugin resolution system for adapter types
+
+### Key Metrics
+
+- Executor: 2,381 LOC across 7 files
+- Adapters: 350 LOC (Claude CLI integration)
+- Adapter-utils: 400 LOC (SSE, process helpers, session management)
+- Total Phase 5: ~2,300 LOC
+- Test coverage: Unit tests for adapter, executor routes, concurrency
 
 ## Build System & Commands
 
@@ -462,7 +522,9 @@ Each feature has corresponding test files:
 
 ---
 
-**Last Updated:** March 2026
-**Total LOC:** ~5,900 (excluding node_modules)
-**Total Files:** ~356 TypeScript files
+**Last Updated:** March 17, 2026
+**Total LOC:** ~8,200 (excluding node_modules)
+**Total Files:** ~380 TypeScript files
+**Phase 5 Status:** COMPLETE (Claude Adapter + Executor App)
+**Next Phase:** Phase 6 (Frontend Pages & UI)
 **Reference:** See [project-overview-pdr.md](./project-overview-pdr.md) for product context

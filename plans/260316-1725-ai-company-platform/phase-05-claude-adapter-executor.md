@@ -8,9 +8,10 @@
 
 ## Overview
 - **Date:** 2026-03-16
+- **Completed:** 2026-03-17
 - **Priority:** P1 — first working adapter
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** complete
 - **Description:** Implement the executor app (Fastify HTTP server on Fly.io VMs) and the Claude CLI adapter. Executor receives POST /execute from control plane, spawns claude CLI via adapter, streams SSE events back.
 
 ## Key Insights

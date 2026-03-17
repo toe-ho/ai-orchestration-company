@@ -15,6 +15,7 @@
     "@aicompany/adapter-utils": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
   }
 }
