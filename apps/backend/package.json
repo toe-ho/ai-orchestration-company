@@ -12,7 +12,8 @@
     "test:setup": "bash scripts/test-db-setup.sh",
     "test:teardown": "bash scripts/test-db-teardown.sh",
     "test:ci": "bash scripts/test-db-setup.sh && pnpm test; EXIT=$?; bash scripts/test-db-teardown.sh; exit $EXIT",
-    "db:migrate": "typeorm migration:run -d dist/infrastructure/persistence/data-source.js"
+    "db:migrate": "typeorm migration:run -d dist/infrastructure/persistence/data-source.js",
+    "db:seed": "node --loader ts-node/esm src/infrastructure/persistence/seeds/run-template-seed.ts"
   },
   "dependencies": {
     "@aicompany/shared": "workspace:*",

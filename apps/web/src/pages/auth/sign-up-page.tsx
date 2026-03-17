@@ -20,7 +20,7 @@ export function SignUpPage(): React.ReactElement {
     try {
       await authApi.signUp({ name, email, password });
       await refresh();
-      navigate('/dashboard');
+      navigate('/onboarding');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Sign up failed');
     } finally {

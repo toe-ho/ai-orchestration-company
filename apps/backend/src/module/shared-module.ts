@@ -26,6 +26,8 @@ import { CostEventModel } from '../infrastructure/persistence/models/cost-event-
 import { ApprovalModel } from '../infrastructure/persistence/models/approval-model.js';
 import { ApprovalCommentModel } from '../infrastructure/persistence/models/approval-comment-model.js';
 import { AgentApiKeyModel } from '../infrastructure/persistence/models/agent-api-key-model.js';
+// Phase 9 models
+import { CompanyTemplateModel } from '../infrastructure/persistence/models/company-template-model.js';
 
 // Repositories
 import { CompanyRepository } from '../infrastructure/repositories/company-repository.js';
@@ -45,6 +47,8 @@ import { AgentRuntimeStateRepository } from '../infrastructure/repositories/agen
 import { CostEventRepository } from '../infrastructure/repositories/cost-event-repository.js';
 import { ApprovalRepository } from '../infrastructure/repositories/approval-repository.js';
 import { AgentApiKeyRepository } from '../infrastructure/repositories/agent-api-key-repository.js';
+// Phase 9 repositories
+import { TemplateRepository } from '../infrastructure/repositories/template-repository.js';
 
 // Injection tokens
 import { COMPANY_REPOSITORY } from '../domain/repositories/i-company-repository.js';
@@ -64,6 +68,8 @@ import { AGENT_RUNTIME_STATE_REPOSITORY } from '../domain/repositories/i-agent-r
 import { COST_EVENT_REPOSITORY } from '../domain/repositories/i-cost-event-repository.js';
 import { APPROVAL_REPOSITORY } from '../domain/repositories/i-approval-repository.js';
 import { AGENT_API_KEY_REPOSITORY } from '../infrastructure/repositories/agent-api-key-repository.js';
+// Phase 9 tokens
+import { TEMPLATE_REPOSITORY } from '../domain/repositories/i-template-repository.js';
 
 // Services
 import { ApiKeyVaultService } from '../application/services/impl/api-key-vault-service.js';
@@ -100,6 +106,8 @@ import { ValidateApiKeyHandler } from '../application/commands/api-key-vault/val
 import { RevokeApiKeyHandler } from '../application/commands/api-key-vault/revoke-api-key-command.js';
 import { CreateAgentApiKeyHandler } from '../application/commands/agent/create-agent-api-key-command.js';
 import { RevokeAgentApiKeyHandler } from '../application/commands/agent/revoke-agent-api-key-command.js';
+// Phase 9 command handlers
+import { CreateCompanyFromTemplateHandler } from '../application/commands/company/create-company-from-template-command.js';
 
 // Query handlers
 import { GetCompanyHandler } from '../application/queries/company/get-company-query.js';
@@ -120,6 +128,9 @@ import { GetDashboardSummaryHandler } from '../application/queries/dashboard/get
 import { GetCostSummaryHandler } from '../application/queries/cost/get-cost-summary-query.js';
 import { ListApprovalsHandler } from '../application/queries/approval/list-approvals-query.js';
 import { GetApprovalHandler } from '../application/queries/approval/get-approval-query.js';
+// Phase 9 query handlers
+import { ListTemplatesHandler } from '../application/queries/template/list-templates-query.js';
+import { GetTemplateHandler } from '../application/queries/template/get-template-query.js';
 
 // Phase 8 event handlers
 import { OnApprovalResolvedHandler } from '../application/events/handlers/on-approval-resolved-handler.js';
@@ -132,6 +143,8 @@ const MODELS = [
   AgentRuntimeStateModel, AgentTaskSessionModel, AgentWakeupRequestModel,
   // Phase 8
   CostEventModel, ApprovalModel, ApprovalCommentModel, AgentApiKeyModel,
+  // Phase 9
+  CompanyTemplateModel,
 ];
 
 const REPOSITORY_PROVIDERS = [
@@ -153,6 +166,8 @@ const REPOSITORY_PROVIDERS = [
   { provide: COST_EVENT_REPOSITORY, useClass: CostEventRepository },
   { provide: APPROVAL_REPOSITORY, useClass: ApprovalRepository },
   { provide: AGENT_API_KEY_REPOSITORY, useClass: AgentApiKeyRepository },
+  // Phase 9
+  { provide: TEMPLATE_REPOSITORY, useClass: TemplateRepository },
 ];
 
 const COMMAND_HANDLERS = [
@@ -167,6 +182,8 @@ const COMMAND_HANDLERS = [
   CreateApprovalHandler, ApproveHandler, RejectHandler, RequestRevisionHandler,
   StoreApiKeyHandler, ValidateApiKeyHandler, RevokeApiKeyHandler,
   CreateAgentApiKeyHandler, RevokeAgentApiKeyHandler,
+  // Phase 9
+  CreateCompanyFromTemplateHandler,
 ];
 
 const QUERY_HANDLERS = [
@@ -179,6 +196,8 @@ const QUERY_HANDLERS = [
   GetDashboardSummaryHandler,
   // Phase 8
   GetCostSummaryHandler, ListApprovalsHandler, GetApprovalHandler,
+  // Phase 9
+  ListTemplatesHandler, GetTemplateHandler,
 ];
 
 const EVENT_HANDLERS = [

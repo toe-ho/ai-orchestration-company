@@ -18,6 +18,8 @@ import { ApiKeysPage } from './pages/settings/api-keys-page.js';
 import { MembersPage } from './pages/settings/members-page.js';
 import { CostDashboardPage } from './pages/costs/cost-dashboard-page.js';
 import { ApprovalsPage } from './pages/approvals/approvals-page.js';
+import { PublicTemplatesPage } from './pages/templates/public-templates-page.js';
+import { OnboardingWizardPage } from './pages/onboarding/onboarding-wizard-page.js';
 
 class RouteErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -52,7 +54,10 @@ export function App(): React.ReactElement {
             <Routes>
               <Route path="/sign-in" element={<SignInPage />} />
               <Route path="/sign-up" element={<SignUpPage />} />
+              <Route path="/templates" element={<PublicTemplatesPage />} />
               <Route element={<ProtectedRoute />}>
+                {/* Onboarding: protected but no sidebar */}
+                <Route path="/onboarding" element={<OnboardingWizardPage />} />
                 <Route element={<RouteErrorBoundary><AppShell /></RouteErrorBoundary>}>
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<DashboardPage />} />

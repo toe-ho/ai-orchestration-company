@@ -18,6 +18,9 @@ import { BoardVmController } from '../presentation/controllers/impl/board/board-
 import { BoardApprovalController } from '../presentation/controllers/impl/board/board-approval-controller.js';
 import { BoardCostController } from '../presentation/controllers/impl/board/board-cost-controller.js';
 import { BoardApiKeyVaultController } from '../presentation/controllers/impl/board/board-api-key-vault-controller.js';
+// Phase 9 controllers
+import { BoardTemplateController } from '../presentation/controllers/impl/board/board-template-controller.js';
+import { PublicTemplateController } from '../presentation/controllers/impl/public/public-template-controller.js';
 
 // Agent controllers
 import { AgentSelfController } from '../presentation/controllers/impl/agent/agent-self-controller.js';
@@ -48,6 +51,9 @@ import { HealthCheckController } from '../presentation/controllers/impl/internal
     AgentIssueController,
     AgentApprovalController,
     HealthCheckController,
+    // Phase 9
+    BoardTemplateController,
+    PublicTemplateController,
   ],
 })
 export class ApiModule {}

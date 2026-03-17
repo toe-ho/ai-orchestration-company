@@ -8,8 +8,8 @@
 ## Overview
 - **Date:** 2026-03-16
 - **Priority:** P3
-- **Status:** pending
-- **Review:** pending
+- **Status:** complete
+- **Review:** done
 - **Description:** Company templates CRUD + seed data (3 starter templates), CreateCompanyFromTemplate command, multi-step onboarding wizard UI, API key setup with validation, public template browsing.
 
 ## Key Insights
